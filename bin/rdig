@@ -1,0 +1,32 @@
+#!/usr/bin/env ruby
+
+# run from RAILS_ROOT with 
+# ruby -Ilib vendor/plugins/sitesearch/create_index.rb config
+# where config is the name of your config file
+
+begin
+  require 'rdig'
+rescue LoadError
+  require 'rubygems'
+  require 'rdig'
+end
+RDig.application.run
+
+
+#$LOAD_PATH << File.expand_path(File.dirname(__FILE__) + "/lib")
+#$LOAD_PATH << File.expand_path(File.dirname(__FILE__))
+#require 'init'
+
+#if ARGV[0]
+#  require ARGV[0]
+#else
+#  require 'config'
+#end
+
+#include SiteSearch
+
+
+#puts "creating new index in #{SiteSearch.settings[:index_dir]}"
+
+#crawler = Crawler.new
+#crawler.run

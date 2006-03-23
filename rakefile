@@ -1,0 +1,321 @@
+# rakefile for RDig.
+# large parts borrowed from rake's Rakefile
+
+begin
+  require 'rubygems'
+  require 'rake/gempackagetask'
+rescue Exception
+  nil
+end
+require 'rake'
+require 'rake/testtask'
+require 'rake/rdoctask'
+require 'rake/packagetask'
+require 'rake/contrib/rubyforgepublisher'
+
+def announce(msg='')
+  STDERR.puts msg
+end
+
+
+PKG_NAME      = 'rdig'
+
+# Determine the current version of the software
+if `ruby -Ilib ./bin/rdig --version` =~ /rdig, version ([0-9.]+)$/
+  CURRENT_VERSION = $1
+else
+  CURRENT_VERSION = "0.0.0"
+end
+
+if ENV['REL']
+  PKG_VERSION = ENV['REL']
+else
+  PKG_VERSION = CURRENT_VERSION
+end
+
+SRC_RB = FileList['lib/**/*.rb']
+
+PKG_FILE_NAME = "#{PKG_NAME}-#{PKG_VERSION}"
+
+RELEASE_NAME  = "REL #{PKG_VERSION}"
+
+RUBY_FORGE_PROJECT = "rdig"
+RUBY_FORGE_USER    = "jkraemer"
+
+PKG_FILES = FileList[
+    "bin/**/*",
+    "lib/**/*",
+    "test/**/*",
+    "doc/**/*",
+    "[A-Z]*",
+    "install.rb",
+    "rakefile"
+].exclude(/\.svn|~$|\.swp$/)
+
+
+desc "Default Task"
+task :default => [ :test_all ]
+
+# Test Tasks -------------------------------------------------------------
+
+task :ta => :test_all
+task :tf => :test_functional
+task :tu => :test_units
+
+# Run all tests
+Rake::TestTask.new("test_all") { |t|
+  t.test_files = FileList[
+    'test/unit/*_test.rb',
+    'test/functional/*_test.rb'
+  ]
+  t.libs << "test"
+  #t.warning = true
+  t.verbose = true
+}
+
+# Run unit tests
+Rake::TestTask.new("test_units") { |t|
+  t.test_files = FileList[ 'test/unit/*_test.rb' ]
+  t.libs << "test"
+  #t.warning = true
+  t.verbose = true
+}
+
+# Run functional tests
+Rake::TestTask.new("test_functional") { |t|
+  t.test_files = FileList[ 'test/functional/*_test.rb' ]
+  t.libs << "test"
+  #t.warning = true
+  t.verbose = true
+}
+
+
+
+# Generate the RDoc documentation ----------------------------------------
+
+rd = Rake::RDocTask.new { |rdoc|
+  rdoc.rdoc_dir = 'doc/html'
+  rdoc.title    = "RDig - Ferret based full text search for web sites"
+  rdoc.options << '--line-numbers' << '--inline-source'
+  rdoc.options << '--main' << 'README'
+  rdoc.template = "#{ENV['template']}.rb" if ENV['template']
+  rdoc.rdoc_files.include('README', 'CHANGES', 'LICENSE', 'TODO')
+  rdoc.rdoc_files.include('lib/**/*.rb')
+}
+
+
+# packaging --------------------------------------------------------------
+
+# ====================================================================
+# Create a task that will package the Rake software into distributable
+# tar, zip and gem files.
+
+if ! defined?(Gem)
+  puts "Package Target requires RubyGEMs"
+else
+  spec = Gem::Specification.new do |s|
+    
+    #### Basic information.
+
+    s.name = 'rdig'
+    s.version = PKG_VERSION
+    s.summary = "Ruby based web site indexing and searching library."
+    s.description = <<-EOF
+    EOF
+
+    #### Dependencies and requirements.
+
+    s.add_dependency('ferret', '>= 0.3.2')
+    s.add_dependency('rubyful_soup', '>= 1.0.4')
+    #s.requirements << ""
+
+    #### Which files are to be included in this gem?  Everything!  (Except CVS directories.)
+
+    s.files = PKG_FILES.to_a
+
+    #### Load-time details: library and application (you will need one or both).
+
+    s.require_path = 'lib'                  # Use these for libraries.
+    s.bindir = "bin"                        # Use these for applications.
+    s.executables = ["rdig"]
+    s.default_executable = "rdig"
+
+    #### Documentation and testing.
+
+    s.has_rdoc = true
+    s.extra_rdoc_files = rd.rdoc_files.reject { |fn| fn =~ /\.rb$/ }.to_a
+    s.rdoc_options <<
+      '--title' <<  'Rake -- Ruby Make' <<
+      '--main' << 'README' <<
+      '--line-numbers'
+
+    #### Author and project details.
+
+    s.author = "Jens Kraemer"
+    s.email = "jk@jkraemer.net"
+    s.homepage = "http://rdig.rubyforge.org"
+    s.rubyforge_project = "rdig"
+#     if ENV['CERT_DIR']
+#       s.signing_key = File.join(ENV['CERT_DIR'], 'gem-private_key.pem')
+#       s.cert_chain  = [File.join(ENV['CERT_DIR'], 'gem-public_cert.pem')]
+#     end
+  end
+
+  package_task = Rake::GemPackageTask.new(spec) do |pkg|
+    pkg.need_zip = true
+    pkg.need_tar = true
+  end
+end
+
+
+
+# misc ----------------------------------------------------------------
+
+def count_lines(filename)
+  lines = 0
+  codelines = 0
+  open(filename) { |f|
+    f.each do |line|
+      lines += 1
+      next if line =~ /^\s*$/
+      next if line =~ /^\s*#/
+      codelines += 1
+    end
+  }
+  [lines, codelines]
+end
+
+def show_line(msg, lines, loc)
+  printf "%6s %6s   %s\n", lines.to_s, loc.to_s, msg
+end
+
+desc "Count lines in the main rake file"
+task :lines do
+  total_lines = 0
+  total_code = 0
+  show_line("File Name", "LINES", "LOC")
+  SRC_RB.each do |fn|
+    lines, codelines = count_lines(fn)
+    show_line(fn, lines, codelines)
+    total_lines += lines
+    total_code  += codelines
+  end
+  show_line("TOTAL", total_lines, total_code)
+end
+
+# Define an optional publish target in an external file.  If the
+# publish.rf file is not found, the publish targets won't be defined.
+
+load "publish.rf" if File.exist? "publish.rf"
+
+
+# Support Tasks ------------------------------------------------------
+
+desc "Look for TODO and FIXME tags in the code"
+task :todo do
+  FileList['**/*.rb'].exclude('pkg').egrep /#.*(FIXME|TODO|TBD)/
+end
+
+desc "Look for Debugging print lines"
+task :dbg do
+  FileList['**/*.rb'].egrep /\bDBG|\bbreakpoint\b/
+end
+
+desc "List all ruby files"
+task :rubyfiles do 
+  puts Dir['**/*.rb'].reject { |fn| fn =~ /^pkg/ }
+  puts Dir['bin/*'].reject { |fn| fn =~ /CVS|(~$)|(\.rb$)/ }
+end
+task :rf => :rubyfiles
+
+
+# --------------------------------------------------------------------
+# Creating a release
+
+desc "Make a new release"
+task :release => [
+      :prerelease,
+      :clobber,
+      :test_all,
+      :update_version,
+      :package,
+      :tag] do
+  
+  announce 
+  announce "**************************************************************"
+  announce "* Release #{PKG_VERSION} Complete."
+  announce "* Packages ready to upload."
+  announce "**************************************************************"
+  announce 
+end
+
+# Validate that everything is ready to go for a release.
+task :prerelease do
+  announce 
+  announce "**************************************************************"
+  announce "* Making RubyGem Release #{PKG_VERSION}"
+  announce "* (current version #{CURRENT_VERSION})"
+  announce "**************************************************************"
+  announce  
+
+  # Is a release number supplied?
+  unless ENV['REL']
+    fail "Usage: rake release REL=x.y.z [REUSE=tag_suffix]"
+  end
+
+  # Is the release different than the current release.
+  # (or is REUSE set?)
+  if PKG_VERSION == CURRENT_VERSION && ! ENV['REUSE']
+    fail "Current version is #{PKG_VERSION}, must specify REUSE=tag_suffix to reuse version"
+  end
+
+  # Are all source files checked in?
+  if ENV['RELTEST']
+    announce "Release Task Testing, skipping checked-in file test"
+  else
+    announce "Checking for unchecked-in files..."
+    data = `svn st`
+    unless data =~ /^$/
+      fail "SVN status is not clean ... do you have unchecked-in files?"
+    end
+    announce "No outstanding checkins found ... OK"
+  end
+end
+
+task :update_version => [:prerelease] do
+  if PKG_VERSION == CURRENT_VERSION
+    announce "No version change ... skipping version update"
+  else
+    announce "Updating RDig version to #{PKG_VERSION}"
+    open("lib/rdig.rb") do |rakein|
+      open("lib/rdig.rb.new", "w") do |rakeout|
+        rakein.each do |line|
+          if line =~ /^RDIGVERSION\s*=\s*/
+            rakeout.puts "RDIGVERSION = '#{PKG_VERSION}'"
+          else
+            rakeout.puts line
+          end
+        end
+      end
+    end
+    mv "lib/rake.rb.new", "lib/rake.rb"
+    if ENV['RELTEST']
+      announce "Release Task Testing, skipping commiting of new version"
+    else
+      sh %{svn commit -m "Updated to version #{PKG_VERSION}" lib/rake.rb}
+    end
+  end
+end
+
+desc "Tag all files with the latest release number (REL=x.y.z)"
+task :tag => [:prerelease] do
+  reltag = "REL_#{PKG_VERSION.gsub(/\./, '_')}"
+  reltag << ENV['REUSE'].gsub(/\./, '_') if ENV['REUSE']
+  announce "Tagging with [#{reltag}]"
+  if ENV['RELTEST']
+    announce "Release Task Testing, skipping CVS tagging"
+  else
+    sh %{cd ..; svn copy trunk tags/#{reltag}}
+  end
+end
+
