@@ -8,7 +8,7 @@ module RDig
 
 
     def run
-      @indexer = Indexer.new(RDig.config.ferret)
+      @indexer = Index::Indexer.new(RDig.config.ferret)
       RDig.config.crawler.start_urls.each { |url| add_url(url) }
       
       num_threads = RDig.config.crawler.num_threads

@@ -51,7 +51,8 @@ require 'htmlentities/htmlentities'
 require 'rdig/http_client'
 require 'rdig/content_extractors'
 require 'rdig/url_filters'
-require 'rdig/ferret'
+require 'rdig/search'
+require 'rdig/index'
 require 'rdig/crawler'
 
 unless defined? String::PATTERN_UTF8
@@ -81,7 +82,7 @@ module RDig
     end
 
     def searcher
-      @searcher ||= Searcher.new(config.ferret)
+      @searcher ||= Search::Searcher.new(config.ferret)
     end
 
     def config
