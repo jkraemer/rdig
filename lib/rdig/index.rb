@@ -6,9 +6,10 @@ module RDig
       include MonitorMixin, Ferret::Index, Ferret::Document
       
       def initialize(settings)
-        @ferret_config = settings
-        @index_writer = IndexWriter.new(@ferret_config.path,
-                                        :create => @ferret_config.create)
+        #@ferret_config = settings
+        @index_writer = IndexWriter.new(settings.path,
+                                        :create   => settings.create,
+                                        :analyzer => settings.analyzer)
         super() # scary, MonitorMixin won't initialize if we don't call super() here (parens matter)
       end
       

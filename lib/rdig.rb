@@ -55,10 +55,8 @@ require 'rdig/search'
 require 'rdig/index'
 require 'rdig/crawler'
 
-unless defined? String::PATTERN_UTF8
-  $KCODE = 'u'
-  require 'jcode'
-end
+$KCODE = 'u'
+require 'jcode'
 
 module RDig
 
@@ -101,7 +99,7 @@ module RDig
           :path                => "index/", 
           :create              => true,
           :handle_parse_errors => true,
-          :analyzer            => nil,
+          :analyzer            => Ferret::Analysis::StandardAnalyzer.new,
           :occur_default       => Ferret::Search::BooleanClause::Occur::MUST
         )
       )
