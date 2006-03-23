@@ -54,8 +54,10 @@ require 'rdig/url_filters'
 require 'rdig/ferret'
 require 'rdig/crawler'
 
-$KCODE = 'u'
-require 'jcode'
+unless defined? String::PATTERN_UTF8
+  $KCODE = 'u'
+  require 'jcode'
+end
 
 module RDig
 
@@ -78,6 +80,10 @@ module RDig
       @application ||= Application.new
     end
 
+    def searcher
+      @searcher ||= Searcher.new(config.ferret)
+    end
+
     def config
       @config ||= OpenStruct.new(
         :crawler           => OpenStruct.new(
@@ -90,9 +96,12 @@ module RDig
           :max_redirects     => 5,
           :wait_before_leave => 10
         ),
-        :ferret            => OpenStruct.new( 
-          :path => "index/", 
-          :create => true
+        :ferret                => OpenStruct.new( 
+          :path                => "index/", 
+          :create              => true,
+          :handle_parse_errors => true,
+          :analyzer            => nil,
+          :occur_default       => Ferret::Search::BooleanClause::Occur::MUST
         )
       )
     end
@@ -111,6 +120,8 @@ module RDig
         "Read aplication configuration from CONFIG."],
       ['--help',     '-h', GetoptLong::NO_ARGUMENT,
         "Display this help message."],
+      ['--query',   '-q', GetoptLong::REQUIRED_ARGUMENT,
+        "Execute QUERY."],
       ['--version',  '-v', GetoptLong::NO_ARGUMENT,
        	"Display the program version."],
     ]
@@ -156,6 +167,8 @@ module RDig
         exit
       when '--config'
         options.config_file = value
+      when '--query'
+        options.query = value
       when '--version'
         puts "rdig, version #{RDIGVERSION}"
         exit
@@ -181,11 +194,19 @@ module RDig
       begin
         load_configfile
       rescue
-        fail "No Configfile found!"
+        puts $!.backtrace
+        fail "No Configfile found!\n#{$!}"
+        
       end    
 
-      @crawler = Crawler.new
-      @crawler.run
+      if options.query
+        # query the index
+        puts "executing query #{options.query}"
+        p RDig.searcher.search(options.query)
+      else
+        @crawler = Crawler.new
+        @crawler.run
+      end
     end
   end
 end

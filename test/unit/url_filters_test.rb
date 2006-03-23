@@ -51,6 +51,16 @@ class UrlFilterTest < Test::Unit::TestCase
     assert_not_nil f.apply(Document.new("http://test.host/affe.htm"))
     assert_nil f.apply(Document.new("http://test.host/affe.html"))
     assert_nil f.apply(Document.new("http://test.host/affe.aspx"))
+    f = UrlFilters::UrlExclusionFilter.new([ /http:\/\/[^\/]+\/dir1/ ])
+    assert_nil f.apply(Document.new("http://test.host/dir1/affe.aspx"))
+    assert_not_nil f.apply(Document.new("http://test.host/dir2/dir1/affe.htm"))
+    assert_not_nil f.apply(Document.new("http://test.host/affe.htm"))
+    assert_not_nil f.apply(Document.new("http://test.host/dir2/affe.htm"))
+    f = UrlFilters::UrlExclusionFilter.new([ /\/dir1/ ])
+    assert_nil f.apply(Document.new("http://test.host/dir1/affe.aspx"))
+    assert_nil f.apply(Document.new("http://test.host/dir2/dir1/affe.htm"))
+    assert_not_nil f.apply(Document.new("http://test.host/affe.htm"))
+    assert_not_nil f.apply(Document.new("http://test.host/dir2/affe.htm"))
   end
 
   def test_hostname_filter

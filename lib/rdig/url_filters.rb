@@ -85,6 +85,7 @@ module RDig
     class UrlPatternFilter
       # takes an Array of Regexps, or nil to disable the filter
       def initialize(args=nil)
+        puts "new pattern filter: #{args.inspect}"
         unless args.nil?
           @patterns = []
           if args.respond_to? :each
