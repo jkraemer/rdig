@@ -1,3 +1,51 @@
-gem install ferret
-gem install rubyful_soup
+dependencies:
+ferret >= 0.3.2
+rubyful_soup 
+
+gem install rdig
+
+basic usage
+===========
+
+- create a config file based on the template in doc/examples
+
+- to create an index:
+rdig -c CONFIGFILE
+
+- to run a query against the index (just to try it out)
+rdig -c CONFIGFILE -q 'your query'
+
+this will dump the results hash to STDOUT
+
+- in your application:
+require 'rdig'
+require 'rdig_config'   # load your config file here
+
+- use RDig.searcher.search(query, options={}) 
+
+
+usage in rails
+==============
+
+- add to config/environment.rb :
+
+require 'rdig'
+require 'rdig_config'
+
+- place rdig_config.rb into config/ directory.
+
+- build index:
+rdig -c config/rdig_config.rb
+
+- in your controller handling the search form:
+
+search_results = RDig.searcher.search(params[:query])
+@results = search_results[:list]
+@hitcount = search_results[:hitcount]
+
+use the :first_doc and :num_docs options to implement 
+paging through search results 
+
+(:num_docs is 10 by default, so without using these options only the first 10
+results will be retrieved)
 
