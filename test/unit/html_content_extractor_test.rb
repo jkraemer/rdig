@@ -5,6 +5,11 @@ class HtmlContentExtractorTest < Test::Unit::TestCase
   def setup
     @extractor = ContentExtractors::HtmlContentExtractor
     @nbsp = [160].pack('U') # non breaking space
+    @config_backup = RDig.config.content_extraction.html.clone
+  end
+
+  def teardown
+    RDig.config.content_extraction.html = @config_backup
   end
 
   def test_simple
@@ -24,6 +29,25 @@ class HtmlContentExtractorTest < Test::Unit::TestCase
     assert_equal 'http://test.host/affe.html?b=a&c=d', result[:links].first
     assert_equal 'http://test.host/affe2.html?b=a&c=d', result[:links].last
     assert_equal "Some > Links don't#{@nbsp}break me! Affe Affe Ümläuts heiß hier ß", result[:content]
+  end
+
+  def test_custom_content_element
+    RDig.configuration do |config|
+      config.content_extraction.html.title_tag_selector = lambda do |tagsoup|
+        tagsoup.find('h1', :attrs => { 'class', 'title' })
+      end
+      config.content_extraction.html.content_tag_selector = lambda do |tagsoup|
+        tagsoup.find('div', :attrs => { 'id', 'content' })
+      end
+    end
+    result = @extractor.process(html_doc('custom_tag_selectors'))
+    assert_equal 'Sample Title in h1', result[:title]
+    assert_equal 'Affe Real content is here.', result[:content]
+    # check if links are collected outside the content tag, too:
+    assert_equal 3, result[:links].size
+    assert_equal 'http://test.host/outside.html', result[:links].first
+    assert_equal '/inside.html', result[:links][1]
+    assert_equal '/footer.html', result[:links][2]
   end
   
 end

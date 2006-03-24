@@ -45,15 +45,13 @@ module RDig
       def self.process(content)
         result = { :title => '' }
         tag_soup = BeautifulSoup.new(content)
-        titleTag = tag_soup.html.head.title
-        result[:title] = titleTag.string.strip if titleTag
+        the_title_tag = title_tag(tag_soup)
+        result[:title] = the_title_tag.string.strip if the_title_tag
+        result[:links] = extract_links(tag_soup)
         content = ''
-        result[:links] = links = []
 
+        # links sollten aber von ganzen dokument bezogen werden, nicht bloss vom content
         process_child = lambda { |child|
-          if child.is_a? Tag and child.name == 'a'
-            links << CGI.unescapeHTML(child['href']) if child['href']
-          end
           if child.is_a? NavigableString
             value = self.strip_comments(child)
             value.strip!
@@ -72,9 +70,31 @@ module RDig
           end
           true
         }
-        tag_soup.html.body.children(&process_child)
+        content_element(tag_soup).children(&process_child)
         result[:content] = content.strip #CGI.unescapeHTML(content.strip)
         return result
+      end
+
+      def self.extract_links(tagsoup)
+        tagsoup.find_all('a').map { |link|
+          CGI.unescapeHTML(link['href']) if link['href']
+        }
+      end
+
+      def self.title_tag(tagsoup)
+        if RDig.config.content_extraction.html.title_tag_selector
+          RDig.config.content_extraction.html.title_tag_selector.call(tagsoup)
+        else 
+          tagsoup.html.head.title
+        end
+      end
+
+      def self.content_element(tagsoup)
+        if RDig.config.content_extraction.html.content_tag_selector
+          RDig.config.content_extraction.html.content_tag_selector.call(tagsoup)
+        else
+          tagsoup.html.body
+        end
       end
 
       def self.strip_comments(string)

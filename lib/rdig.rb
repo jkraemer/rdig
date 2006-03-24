@@ -95,6 +95,20 @@ module RDig
           :max_redirects     => 5,
           :wait_before_leave => 10
         ),
+        :content_extraction  => OpenStruct.new(
+          # settings for html content extraction
+          :html => OpenStruct.new(
+            # select the html element that contains the content to index
+            # by default, we index all inside the body tag:
+            :content_tag_selector => lambda { |tagsoup|
+              tagsoup.html.body
+            },
+            # select the html element containing the title 
+            :title_tag_selector         => lambda { |tagsoup|
+              tagsoup.html.head.title
+            }
+          )
+        ),
         :ferret                => OpenStruct.new( 
           :path                => "index/", 
           :create              => true,

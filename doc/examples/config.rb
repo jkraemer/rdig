@@ -21,6 +21,18 @@ RDig.configuration do |cfg|
   ##################################################################
   # options you might want to set, the given values are the defaults
   
+  # content extraction options
+  
+  # provide a method that selects the tag containing the title of a document
+  # cfg.content_extraction.html.title_tag_selector = lambda { |tagsoup| tagsoup.html.head.title }
+  
+  # provide a method that selects the tag containing the page content you 
+  # want to index. Useful to avoid indexing common elements like navigation
+  # and page footers for every page.
+  # cfg.content_extraction.html.content_tag_selector = lambda { |tagsoup| tagsoup.html.body }
+  
+  # crawler options
+  
   # nil (index all documents) or a list of Regexps 
   # matching URLs you want to index.
   # cfg.crawler.include_documents = nil
