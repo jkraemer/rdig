@@ -9,7 +9,8 @@ module RDig
 
     def run
       @indexer = Index::Indexer.new(RDig.config.ferret)
-      RDig.config.crawler.start_urls.each { |url| add_url(url) }
+      filterchain = UrlFilters::FilterChain.new(RDig.filter_chain)
+      RDig.config.crawler.start_urls.each { |url| add_url(url, filterchain) }
       
       num_threads = RDig.config.crawler.num_threads
       group = ThreadsWait.new
@@ -68,7 +69,7 @@ module RDig
     # pipes a new document pointing to url through the filter chain, 
     # if it survives that, it gets added to the documents queue for further
     # processing
-    def add_url(url, filterchain = nil, referring_document = nil)
+    def add_url(url, filterchain, referring_document = nil)
       return if url.nil? || url.empty?
       if referring_document
         doc = Document.new(url, referring_document.uri)
@@ -80,7 +81,7 @@ module RDig
         doc = Document.new(url)
       end
 
-      doc = filterchain.apply(doc) if filterchain
+      doc = filterchain.apply(doc)
         
       if doc
         puts "added url #{url}"

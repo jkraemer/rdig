@@ -75,10 +75,14 @@ module RDig
         return result
       end
 
+      # extracts the href attributes of all a tags, except 
+      # internal links like <a href="#top">
       def self.extract_links(tagsoup)
-        tagsoup.find_all('a').map { |link|
-          CGI.unescapeHTML(link['href']) if link['href']
+        links = []
+        tagsoup.find_all('a').each { |link|
+          links << CGI.unescapeHTML(link['href']) if (link['href'] && link['href'] !~ /^#/)
         }
+        links
       end
 
       def self.title_tag(tagsoup)
