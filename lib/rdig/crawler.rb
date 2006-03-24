@@ -1,11 +1,12 @@
 module RDig
-    
+  
+  
   class Crawler
     
     def initialize
       @documents = Queue.new
+      @etag_filter = ETagFilter.new
     end
-
 
     def run
       @indexer = Index::Indexer.new(RDig.config.ferret)
@@ -47,6 +48,9 @@ module RDig
 
     def process_document(doc, filterchain)
       doc.fetch
+      # add links from this document to the queue
+      doc.content[:links].each { |url| add_url(url, filterchain, doc) }
+      return unless @etag_filter.apply(doc)
       case doc.status
       when :success
         if doc.content
@@ -102,6 +106,7 @@ module RDig
     attr_reader :uri
     attr_reader :referring_uri
     attr_reader :status
+    attr_reader :etag
     attr_accessor :redirections
     
     # url: url of this document, may be relative to the referring doc or host.
@@ -131,6 +136,7 @@ module RDig
       when Net::HTTPSuccess
         @content_type = response['content-type']
         @raw_body = response.body
+        @etag = response['etag']
         # todo externalize this (another chain ?)
         @content = ContentExtractors.process(@raw_body, @content_type)
         @status = :success
@@ -138,11 +144,33 @@ module RDig
         @status = :redirect
         @content = { :links => [ response['location'] ] }
       else
-        puts "dunno what to do with response: #{response}"
+        puts "don't know what to do with response: #{response}"
       end
        
     end
 
+  end
+  
+  # checks fetched documents' E-Tag headers against the list of E-Tags
+  # of the documents already indexed.
+  # This is supposed to help against double-indexing documents which can 
+  # be reached via different URLs (think http://host.com/ and 
+  # http://host.com/index.html )
+  # Documents without ETag are allowed to pass through
+  class ETagFilter
+    include MonitorMixin
+
+    def initialize
+      @etags = Set.new
+      super
+    end
+
+    def apply(document)
+      return document unless document.etag 
+      synchronize do
+        @etags.add?(document.etag) ? document : nil 
+      end
+    end
   end
 
 end

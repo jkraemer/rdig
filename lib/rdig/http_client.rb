@@ -1,5 +1,3 @@
-require 'net/http'
-
 module RDig
   
   module HttpClient
