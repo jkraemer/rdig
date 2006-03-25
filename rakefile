@@ -94,7 +94,7 @@ Rake::TestTask.new("test_functional") { |t|
 # Generate the RDoc documentation ----------------------------------------
 
 rd = Rake::RDocTask.new { |rdoc|
-  rdoc.rdoc_dir = 'doc/html'
+  rdoc.rdoc_dir = 'html'
   rdoc.title    = "RDig - Ferret based full text search for web sites"
   rdoc.options << '--line-numbers' << '--inline-source'
   rdoc.options << '--main' << 'README'
@@ -323,3 +323,8 @@ task :tag => [:prerelease] do
   end
 end
 
+# Publish RDocs ------------------------------------------------------
+desc "Publish the API documentation"
+task :pdoc => [:rdoc] do
+  Rake::RubyForgePublisher.new(RUBY_FORGE_PROJECT, RUBY_FORGE_USER).upload
+end
