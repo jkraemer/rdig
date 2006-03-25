@@ -34,6 +34,7 @@ require 'monitor'
 require 'ostruct'
 require 'uri'
 require 'cgi'
+require 'set'
 require 'net/http'
 require 'getoptlong'
 
@@ -58,6 +59,7 @@ require 'rdig/crawler'
 $KCODE = 'u'
 require 'jcode'
 
+# See README for basic usage information
 module RDig
 
   class << self
@@ -83,46 +85,52 @@ module RDig
       @searcher ||= Search::Searcher.new(config.ferret)
     end
 
-    def config
-      @config ||= OpenStruct.new(
-        :crawler           => OpenStruct.new(
-          :start_urls        => [ "http://localhost:3000/" ],
-          :include_hosts     => [ "localhost" ],
-          :include_documents => nil,
-          :exclude_documents => nil,
-          :index_document    => nil,
-          :num_threads       => 2,
-          :max_redirects     => 5,
-          :wait_before_leave => 10
-        ),
-        :content_extraction  => OpenStruct.new(
-          # settings for html content extraction
-          :html => OpenStruct.new(
-            # select the html element that contains the content to index
-            # by default, we index all inside the body tag:
-            :content_tag_selector => lambda { |tagsoup|
-              tagsoup.html.body
-            },
-            # select the html element containing the title 
-            :title_tag_selector         => lambda { |tagsoup|
-              tagsoup.html.head.title
-            }
-          )
-        ),
-        :ferret                => OpenStruct.new( 
-          :path                => "index/", 
-          :create              => true,
-          :handle_parse_errors => true,
-          :analyzer            => Ferret::Analysis::StandardAnalyzer.new,
-          :occur_default       => Ferret::Search::BooleanClause::Occur::MUST
-        )
-      )
-    end
-
-    # RDig.configuration do |config| ...
+    # RDig configuration
+    #
+    # may be used with a block:
+    #   RDig.configuration do |config| ...
+    #
+    # see doc/examples/config.rb for a commented example configuration
     def configuration
-      yield config
+      if block_given?
+        yield configuration
+      else
+        @config ||= OpenStruct.new(
+          :crawler           => OpenStruct.new(
+            :start_urls        => [ "http://localhost:3000/" ],
+            :include_hosts     => [ "localhost" ],
+            :include_documents => nil,
+            :exclude_documents => nil,
+            :index_document    => nil,
+            :num_threads       => 2,
+            :max_redirects     => 5,
+            :wait_before_leave => 10
+          ),
+          :content_extraction  => OpenStruct.new(
+            # settings for html content extraction
+            :html => OpenStruct.new(
+              # select the html element that contains the content to index
+              # by default, we index all inside the body tag:
+              :content_tag_selector => lambda { |tagsoup|
+                tagsoup.html.body
+              },
+              # select the html element containing the title 
+              :title_tag_selector         => lambda { |tagsoup|
+                tagsoup.html.head.title
+              }
+            )
+          ),
+          :ferret                => OpenStruct.new( 
+            :path                => "index/", 
+            :create              => true,
+            :handle_parse_errors => true,
+            :analyzer            => Ferret::Analysis::StandardAnalyzer.new,
+            :occur_default       => Ferret::Search::BooleanClause::Occur::MUST
+          )
+        )
+      end
     end
+    alias config configuration
     
   end
 
@@ -214,9 +222,19 @@ module RDig
 
       if options.query
         # query the index
-        puts "executing query #{options.query}"
-        p RDig.searcher.search(options.query)
+        puts "executing query >#{options.query}<"
+        results = RDig.searcher.search(options.query)
+        puts "total results: #{results[:hitcount]}"
+        results[:list].each { |result|
+          puts <<-EOF
+#{result[:url]}
+  #{result[:title]}
+  #{result[:extract]}
+
+          EOF
+        }
       else
+        # rebuild index
         @crawler = Crawler.new
         @crawler.run
       end

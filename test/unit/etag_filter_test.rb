@@ -1,5 +1,5 @@
 require 'test_helper'
-class UrlFilterTest < Test::Unit::TestCase
+class ETagFilterTest < Test::Unit::TestCase
   include TestHelper, RDig
 
   def setup

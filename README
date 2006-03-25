@@ -1,51 +1,61 @@
-dependencies:
-ferret >= 0.3.2
-rubyful_soup 
+= RDig
 
-gem install rdig
+RDig provides an HTTP crawler and content extraction utilities
+to help building a site search for web sites or intranets. Internally,
+Ferret is used for the full text indexing. After creating a config file 
+for your site, the index can be built with a single call to rdig.
 
-basic usage
-===========
+RDig depends on Ferret (>= 0.3.2) and the RubyfulSoup library (>= 1.0.4).
 
+== basic usage
+
+
+=== Index creation
 - create a config file based on the template in doc/examples
-
 - to create an index:
-rdig -c CONFIGFILE
-
+    rdig -c CONFIGFILE
 - to run a query against the index (just to try it out)
-rdig -c CONFIGFILE -q 'your query'
+    rdig -c CONFIGFILE -q 'your query'
+  this will dump the first 10 search results to STDOUT
 
-this will dump the results hash to STDOUT
+=== Handle search in your application:
+  require 'rdig'
+  require 'rdig_config'   # load your config file here
+  search_results = RDig.searcher.search(query, options={})
 
-- in your application:
-require 'rdig'
-require 'rdig_config'   # load your config file here
-
-- use RDig.searcher.search(query, options={}) 
+see RDig::Search::Searcher for more information.
 
 
-usage in rails
-==============
+== usage in rails
 
 - add to config/environment.rb :
-
-require 'rdig'
-require 'rdig_config'
-
+    require 'rdig'
+    require 'rdig_config'
 - place rdig_config.rb into config/ directory.
-
 - build index:
-rdig -c config/rdig_config.rb
+    rdig -c config/rdig_config.rb
+- in your controller that handles the search form:
+    search_results = RDig.searcher.search(params[:query])
+    @results = search_results[:list]
+    @hitcount = search_results[:hitcount]
 
-- in your controller handling the search form:
-
-search_results = RDig.searcher.search(params[:query])
-@results = search_results[:list]
-@hitcount = search_results[:hitcount]
-
-use the :first_doc and :num_docs options to implement 
-paging through search results 
-
+=== search result paging
+Use the :first_doc and :num_docs options to implement 
+paging through search results. 
 (:num_docs is 10 by default, so without using these options only the first 10
 results will be retrieved)
+
+
+== sample configuration
+
+from doc/examples/config.rb. The tag_selector properties are called 
+with a BeautifulSoup instance as parameter. See the RubyfulSoup Site[http://www.crummy.com/software/RubyfulSoup/documentation.html] for more info about this cool lib.
+You can also have a look at the +html_content_extractor+ unit test.
+
+See [] for API documentation of the 
+Rubyful Soup lib used 
+
+:include:doc/examples/config.rb
+
+
 

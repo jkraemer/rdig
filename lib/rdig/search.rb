@@ -1,18 +1,22 @@
 module RDig
   module Search
 
-    # used to search the index
+    # This class is used to search the index.
+    # Call RDig::searcher to retrieve an instance ready for use.
     class Searcher
       include Ferret::Search
-  
+      
+      # the query parser used to parse query strings
       attr_reader :query_parser
   
+      # takes the ferret section of the rdig configuration as a parameter.
       def initialize(settings)
         @ferret_config = settings
         @query_parser = Ferret::QueryParser.new('*', settings.marshal_dump)
         ferret_searcher
       end
   
+      # returns the Ferret::Search::IndexSearcher instance used internally.    
       def ferret_searcher
         if @ferret_searcher and !@ferret_searcher.reader.latest?
           # reopen searcher
@@ -26,9 +30,15 @@ module RDig
         @ferret_searcher
       end
   
-      # options:
-      # first_doc: first document in result list to retrieve (0-based)
-      # num_docs : number of documents to retrieve
+      # run a search. 
+      # +query+ usually will be a user-entered string. See the Ferret query 
+      # language[http://ferret.davebalmain.com/api/classes/Ferret/QueryParser.html]
+      # for more information on queries.
+      # A Ferret::Search::Query instance may be given, too.
+      # 
+      # Otions are:
+      # first_doc:: first document in result list to retrieve (0-based). The default is 0.
+      # num_docs:: number of documents to retrieve. The default is 10.
       def search(query, options={})
         result = {}
         query = query_parser.parse(query) if query.is_a?(String)

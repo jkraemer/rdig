@@ -23,9 +23,13 @@ end
 
 module RDig
  
-  # todo support at least pdf, too
+  # Contains Classes which are used for extracting content and meta data from
+  # various content types.
+  #
+  # TODO: support at least pdf, too.
   module ContentExtractors
 
+    # process the given +content+ depending on it's +content_type+.
     def ContentExtractors.process(content, content_type)
       case content_type
       when /^(text\/(html|xml)|application\/(xhtml\+xml|xml))/
@@ -36,6 +40,7 @@ module RDig
       return nil
     end
 
+    # extracts title, content and links from html documents
     class HtmlContentExtractor
 
       # returns: 
@@ -43,36 +48,28 @@ module RDig
       #   :meta => { :title => 'Title' },
       #   :links => [array of urls] }
       def self.process(content)
-        result = { :title => '' }
+        result = { }
         tag_soup = BeautifulSoup.new(content)
-        the_title_tag = title_tag(tag_soup)
-        result[:title] = the_title_tag.string.strip if the_title_tag
+        result[:title] = extract_title(tag_soup)
         result[:links] = extract_links(tag_soup)
-        content = ''
-
-        # links sollten aber von ganzen dokument bezogen werden, nicht bloss vom content
-        process_child = lambda { |child|
-          if child.is_a? NavigableString
-            value = self.strip_comments(child)
-            value.strip!
-            unless value.empty?
-              content << value
-              content << ' '
-            end
-          elsif child.string  # it's a Tag, and it has some content string
-            value = child.string.strip 
-            unless value.empty?
-              content << value
-              content << ' '
-            end
-          else
-            child.children(&process_child)
-          end
-          true
-        }
-        content_element(tag_soup).children(&process_child)
-        result[:content] = content.strip #CGI.unescapeHTML(content.strip)
+        result[:content] = extract_content(tag_soup)
         return result
+      end
+
+      # Extracts textual content from the HTML tree.
+      #
+      # - First, the root element to use is determined using the 
+      # +content_element+ method, which itself uses the content_tag_selector
+      # from RDig.configuration.
+      # - Then, this element is processed by +extract_text+, which will give
+      # all textual content contained in the root element and all it's
+      # children.
+      def self.extract_content(tag_soup)
+        content = ''
+        content_element(tag_soup).children { |child| 
+          extract_text(child, content)
+        }
+        return content.strip
       end
 
       # extracts the href attributes of all a tags, except 
@@ -83,6 +80,44 @@ module RDig
         }.compact
       end
 
+      # Extracts the title from the given html tree
+      def self.extract_title(tagsoup)
+        title = ''
+        the_title_tag = title_tag(tagsoup)
+        if the_title_tag.is_a? String
+          the_title_tag
+        else
+          extract_text(the_title_tag).strip if the_title_tag
+        end
+      end
+
+      # Recursively extracts all text contained in the given element, 
+      # and appends it to content.
+      def self.extract_text(element, content='')
+        if element.is_a? NavigableString
+          value = strip_comments(element)
+          value.strip!
+          unless value.empty?
+            content << value
+            content << ' '
+          end
+        elsif element.string  # it's a Tag, and it has some content string
+          value = element.string.strip 
+          unless value.empty?
+            content << value
+            content << ' '
+          end
+        else
+          element.children { |child|
+            extract_text(child, content)
+          }
+        end
+      end
+
+      # Returns the element to extract the title from.
+      #
+      # This may return a string, e.g. an attribute value selected from a meta
+      # tag, too.
       def self.title_tag(tagsoup)
         if RDig.config.content_extraction.html.title_tag_selector
           RDig.config.content_extraction.html.title_tag_selector.call(tagsoup)
@@ -91,6 +126,7 @@ module RDig
         end
       end
 
+      # Retrieve the root element to extract document content from
       def self.content_element(tagsoup)
         if RDig.config.content_extraction.html.content_tag_selector
           RDig.config.content_extraction.html.content_tag_selector.call(tagsoup)
@@ -99,6 +135,7 @@ module RDig
         end
       end
 
+      # Return the given string minus all html comments
       def self.strip_comments(string)
         string.gsub(Regexp.new('<!--.*?-->', Regexp::MULTILINE, 'u'), '')
       end

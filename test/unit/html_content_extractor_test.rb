@@ -49,6 +49,16 @@ class HtmlContentExtractorTest < Test::Unit::TestCase
     assert_equal '/inside.html', result[:links][1]
     assert_equal '/footer.html', result[:links][2]
   end
+
+  def test_title_from_dcmeta
+    RDig.configuration do |config|
+      config.content_extraction.html.title_tag_selector = lambda do |tagsoup|
+        tagsoup.find('meta', :attrs => { 'name', 'DC.title' })['content']
+      end
+    end
+    result = @extractor.process(html_doc('custom_tag_selectors'))
+    assert_equal 'Title from DC meta data', result[:title]
+  end
   
 end
 

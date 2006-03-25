@@ -13,6 +13,7 @@ $ruby = CONFIG['ruby_install_name']
 # handle running it. Under windows, we add a '.rb' extension
 # and let file associations to their stuff
 #
+# based on install.rb from the Rake distribution
 
 def installBIN(from, opfile)
 

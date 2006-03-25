@@ -107,7 +107,7 @@ rd = Rake::RDocTask.new { |rdoc|
 # packaging --------------------------------------------------------------
 
 # ====================================================================
-# Create a task that will package the Rake software into distributable
+# Create a task that will package the software into distributable
 # tar, zip and gem files.
 
 if ! defined?(Gem)
@@ -121,6 +121,10 @@ else
     s.version = PKG_VERSION
     s.summary = "Ruby based web site indexing and searching library."
     s.description = <<-EOF
+    RDig provides an HTTP crawler and content extraction utilities
+    to help building a site search for web sites or intranets. Internally,
+    Ferret is used for the full text indexing. After creating a config file 
+    for your site, the index can be built with a single call to rdig.
     EOF
 
     #### Dependencies and requirements.
@@ -153,7 +157,7 @@ else
 
     s.author = "Jens Kraemer"
     s.email = "jk@jkraemer.net"
-    s.homepage = "http://rdig.rubyforge.org"
+    s.homepage = "http://rdig.rubyforge.org/"
     s.rubyforge_project = "rdig"
 #     if ENV['CERT_DIR']
 #       s.signing_key = File.join(ENV['CERT_DIR'], 'gem-private_key.pem')

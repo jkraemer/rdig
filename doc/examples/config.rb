@@ -1,7 +1,3 @@
-#
-# sample RDig configuration file, edit to taste
-#
-
 RDig.configuration do |cfg|
 
   ##################################################################
@@ -33,11 +29,11 @@ RDig.configuration do |cfg|
   
   # crawler options
   
-  # nil (index all documents) or a list of Regexps 
+  # nil (index all documents) or an array of Regexps 
   # matching URLs you want to index.
   # cfg.crawler.include_documents = nil
 
-  # nil (no documents excluded) or a list of Regexps 
+  # nil (no documents excluded) or an array of Regexps 
   # matching URLs not to index.
   # this filter is used after the one above, so you only need
   # to exclude documents here that aren't wanted but would be 
