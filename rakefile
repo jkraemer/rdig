@@ -302,11 +302,11 @@ task :update_version => [:prerelease] do
         end
       end
     end
-    mv "lib/rake.rb.new", "lib/rake.rb"
+    mv "lib/rdig.rb.new", "lib/rdig.rb"
     if ENV['RELTEST']
       announce "Release Task Testing, skipping commiting of new version"
     else
-      sh %{svn commit -m "Updated to version #{PKG_VERSION}" lib/rake.rb}
+      sh %{svn commit -m "Updated to version #{PKG_VERSION}" lib/rdig.rb}
     end
   end
 end
@@ -317,7 +317,7 @@ task :tag => [:prerelease] do
   reltag << ENV['REUSE'].gsub(/\./, '_') if ENV['REUSE']
   announce "Tagging with [#{reltag}]"
   if ENV['RELTEST']
-    announce "Release Task Testing, skipping CVS tagging"
+    announce "Release Task Testing, skipping tagging"
   else
     sh %{cd ..; svn copy trunk tags/#{reltag}}
   end
