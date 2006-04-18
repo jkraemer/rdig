@@ -37,6 +37,10 @@ require 'cgi'
 require 'set'
 require 'net/http'
 require 'getoptlong'
+require 'tempfile'
+# mkmf gives us the handy find_executable method used to check for helper
+# programs:
+require 'mkmf'      
 
 begin
   require 'rubyful_soup'
