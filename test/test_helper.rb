@@ -12,6 +12,12 @@ module TestHelper
     }
   end
 
+  def word_doc(name)
+    read_fixture("word/#{name}.doc")
+  end
+  def pdf_doc(name)
+    read_fixture("pdf/#{name}.pdf")
+  end
   def html_doc(name)
     read_fixture("html/#{name}.html")
   end

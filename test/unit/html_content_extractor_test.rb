@@ -3,7 +3,7 @@ class HtmlContentExtractorTest < Test::Unit::TestCase
   include TestHelper
 
   def setup
-    @extractor = ContentExtractors::HtmlContentExtractor
+    @extractor = ContentExtractors::HtmlContentExtractor.new
     @nbsp = [160].pack('U') # non breaking space
     @config_backup = RDig.config.content_extraction.html.clone
   end
@@ -12,8 +12,17 @@ class HtmlContentExtractorTest < Test::Unit::TestCase
     RDig.config.content_extraction.html = @config_backup
   end
 
+  def test_can_do
+    assert !@extractor.can_do('application/pdf')
+    assert !@extractor.can_do('application/msword')
+    assert @extractor.can_do('text/html')
+    assert @extractor.can_do('text/xml')
+    assert @extractor.can_do('application/xml')
+    assert @extractor.can_do('application/xhtml+xml')
+  end
+ 
   def test_simple
-    result = @extractor.process(html_doc('simple'))
+    result = ContentExtractors.process(html_doc('simple'), 'text/html')
     assert_not_nil result
     assert_equal 'Sample Title', result[:title]
     assert_not_nil result[:content]

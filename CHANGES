@@ -1,2 +1,8 @@
+0.2.0
+- add pdf and Word content extraction capabilities using the tools
+  from the xpdf-utils and wv packages
+- additional content extractors may be plugged in by extending 
+  the ContentExtractor class
+
 0.1.0
 initial release
