@@ -49,7 +49,10 @@ module RDig
     def process_document(doc, filterchain)
       doc.fetch
       # add links from this document to the queue
-      doc.content[:links].each { |url| add_url(url, filterchain, doc) }
+      doc.content[:links].each { |url| 
+        add_url(url, filterchain, doc) 
+      } unless doc.content[:links].nil?
+
       return unless @etag_filter.apply(doc)
       case doc.status
       when :success

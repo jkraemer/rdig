@@ -52,9 +52,6 @@ from doc/examples/config.rb. The tag_selector properties are called
 with a BeautifulSoup instance as parameter. See the RubyfulSoup Site[http://www.crummy.com/software/RubyfulSoup/documentation.html] for more info about this cool lib.
 You can also have a look at the +html_content_extractor+ unit test.
 
-See [] for API documentation of the 
-Rubyful Soup lib used 
-
 :include:doc/examples/config.rb
 
 

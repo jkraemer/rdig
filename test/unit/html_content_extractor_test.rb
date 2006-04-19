@@ -59,6 +59,7 @@ class HtmlContentExtractorTest < Test::Unit::TestCase
     assert_equal '/footer.html', result[:links][2]
   end
 
+  
   def test_title_from_dcmeta
     RDig.configuration do |config|
       config.content_extraction.html.title_tag_selector = lambda do |tagsoup|
@@ -67,6 +68,19 @@ class HtmlContentExtractorTest < Test::Unit::TestCase
     end
     result = @extractor.process(html_doc('custom_tag_selectors'))
     assert_equal 'Title from DC meta data', result[:title]
+  end
+  
+  def test_preprocessed_title
+    RDig.configuration do |config|
+      config.content_extraction.html.title_tag_selector = lambda do |tagsoup|
+        title = tagsoup.find('meta', :attrs => { 'name', 'DC.title' })['content']
+        # use only a portion of the title tag's contents if it matches our
+        # regexp:
+        title =~ /^(.*)meta data$/ ? $1.strip : title.strip
+      end
+    end
+    result = @extractor.process(html_doc('custom_tag_selectors'))
+    assert_equal 'Title from DC', result[:title]
   end
   
 end
