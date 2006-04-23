@@ -51,7 +51,6 @@ end
 
 require 'htmlentities/htmlentities'
     
-require 'rdig/http_client'
 require 'rdig/content_extractors'
 require 'rdig/url_filters'
 require 'rdig/search'
