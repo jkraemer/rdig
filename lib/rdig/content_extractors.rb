@@ -171,13 +171,14 @@ module RDig
               }
             )))
 
+        # TODO: besser: if $?.exitstatus == 127 (not found)
         @available = %x{#{@wvhtml} -h 2>&1} =~ /Dom Lachowicz/
       end
       
       def process(content)
         result = {}
-        as_file(content) do |infile|  
-          result = @html_extractor.process(%x{#{@wvhtml} --charset=UTF-8 '#{infile.path}' -})
+        as_file(content) do |file|  
+          result = @html_extractor.process(%x{#{@wvhtml} --charset=UTF-8 '#{file.path}' -})
         end
         return result || {}
       end
