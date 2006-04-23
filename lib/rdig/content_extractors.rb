@@ -177,13 +177,7 @@ module RDig
       def process(content)
         result = {}
         as_file(content) do |infile|  
-          outfile = Tempfile.new('rdig')
-          outfile.close
-          %x{#{@wvhtml} --targetdir='#{File.dirname(outfile.path)}' '#{infile.path}' '#{File.basename(outfile.path)}'}
-          File.open(outfile.path) do |html|
-            result = @html_extractor.process(html.read)
-          end
-          outfile.delete
+          result = @html_extractor.process(%x{#{@wvhtml} --charset=UTF-8 '#{infile.path}' -})
         end
         return result || {}
       end

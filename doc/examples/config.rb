@@ -16,6 +16,9 @@ RDig.configuration do |cfg|
 
   ##################################################################
   # options you might want to set, the given values are the defaults
+
+  # set to true to get stack traces on errors
+  # cfg.verbose = false
   
   # content extraction options
   
