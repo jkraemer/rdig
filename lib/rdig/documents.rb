@@ -88,7 +88,6 @@ module RDig
   # Remote Document to be retrieved by HTTP
   #
   class HttpDocument < Document
-    include HttpClient
 
     attr_reader :referring_uri
     attr_reader :status
