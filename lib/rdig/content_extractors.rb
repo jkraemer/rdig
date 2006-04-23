@@ -54,7 +54,9 @@ module RDig
 
       def self.extractors; @@extractors ||= [] end
       def self.extractor_instances
-        @@extractor_instances ||= extractors.map { |ex_class| ex_class.new }
+        @@extractor_instances ||= extractors.map { |ex_class| 
+          ex_class.new(RDig.configuration.content_extraction) 
+        }
       end
       
       def self.process(content, content_type)
@@ -63,6 +65,10 @@ module RDig
         }
         puts "unable to handle content type #{content_type}"
         nil
+      end
+
+      def initialize(config)
+        @config = config
       end
 
       def can_do(content_type)
@@ -107,7 +113,8 @@ module RDig
     class PdfContentExtractor < ContentExtractor
       include ExternalAppHelper
       
-      def initialize
+      def initialize(config)
+        super(config)
         @pattern = /^application\/pdf/
         @pdftotext = 'pdftotext'
         @pdfinfo = 'pdfinfo'
@@ -144,15 +151,26 @@ module RDig
 
     # Extract text from word documents
     #
-    # Requires the antiword utility
-    # (on debian and friends do 'apt-get install antiword')
+    # Requires the wvHtml utility
+    # (on debian and friends do 'apt-get install wv')
     class WordContentExtractor < ContentExtractor
       include ExternalAppHelper
       
-      def initialize
+      def initialize(config)
+        super(config)
         @wvhtml = 'wvHtml'
         @pattern = /^application\/msword/
-        @html_extractor = HtmlContentExtractor.new
+        # html extractor for parsing wvHtml output
+        @html_extractor = HtmlContentExtractor.new(OpenStruct.new(
+            :html => OpenStruct.new(
+              :content_tag_selector => lambda { |tagsoup|
+                tagsoup.html.body
+              },
+              :title_tag_selector         => lambda { |tagsoup|
+                tagsoup.html.head.title
+              }
+            )))
+
         @available = %x{#{@wvhtml} -h 2>&1} =~ /Dom Lachowicz/
       end
       
@@ -175,7 +193,8 @@ module RDig
     # extracts title, content and links from html documents
     class HtmlContentExtractor < ContentExtractor
 
-      def initialize
+      def initialize(config)
+        super(config)
         @pattern = /^(text\/(html|xml)|application\/(xhtml\+xml|xml))/
       end
 
@@ -202,9 +221,10 @@ module RDig
       # children.
       def extract_content(tag_soup)
         content = ''
-        content_element(tag_soup).children { |child| 
+        ce = content_element(tag_soup)
+        ce.children { |child| 
           extract_text(child, content)
-        }
+        } unless ce.nil?
         return content.strip
       end
 
@@ -218,18 +238,20 @@ module RDig
 
       # Extracts the title from the given html tree
       def extract_title(tagsoup)
-        title = ''
         the_title_tag = title_tag(tagsoup)
         if the_title_tag.is_a? String
           the_title_tag
         else
-          extract_text(the_title_tag).strip if the_title_tag
+          title = ''
+          extract_text(the_title_tag, title)
+          title.strip
         end
       end
 
       # Recursively extracts all text contained in the given element, 
       # and appends it to content.
       def extract_text(element, content='')
+        return nil if element.nil?
         if element.is_a? NavigableString
           value = strip_comments(element)
           value.strip!
@@ -255,8 +277,8 @@ module RDig
       # This may return a string, e.g. an attribute value selected from a meta
       # tag, too.
       def title_tag(tagsoup)
-        if RDig.config.content_extraction.html.title_tag_selector
-          RDig.config.content_extraction.html.title_tag_selector.call(tagsoup)
+        if @config.html.title_tag_selector
+          @config.html.title_tag_selector.call(tagsoup)
         else 
           tagsoup.html.head.title
         end
@@ -264,8 +286,8 @@ module RDig
 
       # Retrieve the root element to extract document content from
       def content_element(tagsoup)
-        if RDig.config.content_extraction.html.content_tag_selector
-          RDig.config.content_extraction.html.content_tag_selector.call(tagsoup)
+        if @config.html.content_tag_selector
+          @config.html.content_tag_selector.call(tagsoup)
         else
           tagsoup.html.body
         end

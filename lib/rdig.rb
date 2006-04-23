@@ -40,22 +40,23 @@ require 'getoptlong'
 require 'tempfile'
 
 begin
-  require 'rubyful_soup'
   require 'ferret'
+  require 'rubyful_soup'
 rescue LoadError
   require 'rubygems'
-  require 'rubyful_soup'
   require 'ferret'
+  require 'rubyful_soup'
 end
 
 require 'htmlentities/htmlentities'
-
+    
 require 'rdig/http_client'
 require 'rdig/content_extractors'
 require 'rdig/url_filters'
 require 'rdig/search'
 require 'rdig/index'
 require 'rdig/crawler'
+
 
 $KCODE = 'u'
 require 'jcode'
@@ -220,6 +221,8 @@ module RDig
         fail "No Configfile found!\n#{$!}"
         
       end    
+
+      puts "using Ferret #{Ferret::VERSION}"
 
       if options.query
         # query the index

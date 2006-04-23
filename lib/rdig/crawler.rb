@@ -70,6 +70,7 @@ module RDig
       end
     rescue
       puts "error processing document #{doc.uri.to_s}: #{$!}"
+      puts "Trace: #{$!.backtrace.join("\n")}" if RDig::config.verbose
     end
 
     
@@ -91,11 +92,9 @@ module RDig
       doc = filterchain.apply(doc)
         
       if doc
-        puts "added url #{url}"
-        #else
-        #puts "skipping url #{url}"
+        @documents << doc
+        puts "added url #{url}" if RDig::config.verbose
       end
-      @documents << doc if doc
     end
     
   end
@@ -146,10 +145,12 @@ module RDig
       when Net::HTTPRedirection
         @status = :redirect
         @content = { :links => [ response['location'] ] }
+      when Net::HTTPNotFound
+        puts "got 404 for #{url}"
       else
         puts "don't know what to do with response: #{response}"
       end
-       
+      @content ||= {}
     end
 
   end

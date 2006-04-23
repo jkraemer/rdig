@@ -1,3 +1,14 @@
+0.2.2
+- PDF title extraction with pdfinfo
+- removed dependency on mkmf which doesn't seem to exist in Ruby 1.8.2
+- made content extractors more flexible - instances now use a given 
+  configuration instead of the global one. This allows the 
+  WordContentExtractor to use an HtmlContentExtractor with it's own 
+  configuration that is independent of the global config.
+
+0.2.1
+- Bugfix release
+
 0.2.0
 - add pdf and Word content extraction capabilities using the tools
   from the xpdf-utils and wv packages

@@ -3,7 +3,7 @@ class PdfContentExtractorTest < Test::Unit::TestCase
   include TestHelper
 
   def setup
-    @ce = ContentExtractors::PdfContentExtractor.new
+    @ce = ContentExtractors::PdfContentExtractor.new(RDig.configuration.content_extraction)
   end
 
   def test_can_do

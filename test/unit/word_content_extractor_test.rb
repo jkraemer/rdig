@@ -3,7 +3,7 @@ class WordContentExtractorTest < Test::Unit::TestCase
   include TestHelper
 
   def setup
-    @ce = ContentExtractors::WordContentExtractor.new
+    @ce = ContentExtractors::WordContentExtractor.new(RDig.configuration.content_extraction)
   end
 
   def test_can_do

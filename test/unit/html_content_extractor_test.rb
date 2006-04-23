@@ -3,13 +3,9 @@ class HtmlContentExtractorTest < Test::Unit::TestCase
   include TestHelper
 
   def setup
-    @extractor = ContentExtractors::HtmlContentExtractor.new
+    @config = OpenStruct.new(:html => RDig.config.content_extraction.html.clone)
+    @extractor = ContentExtractors::HtmlContentExtractor.new(@config)
     @nbsp = [160].pack('U') # non breaking space
-    @config_backup = RDig.config.content_extraction.html.clone
-  end
-
-  def teardown
-    RDig.config.content_extraction.html = @config_backup
   end
 
   def test_can_do
@@ -41,13 +37,11 @@ class HtmlContentExtractorTest < Test::Unit::TestCase
   end
 
   def test_custom_content_element
-    RDig.configuration do |config|
-      config.content_extraction.html.title_tag_selector = lambda do |tagsoup|
-        tagsoup.find('h1', :attrs => { 'class', 'title' })
-      end
-      config.content_extraction.html.content_tag_selector = lambda do |tagsoup|
-        tagsoup.find('div', :attrs => { 'id', 'content' })
-      end
+    @config.html.title_tag_selector = lambda do |tagsoup|
+      tagsoup.find('h1', :attrs => { 'class', 'title' })
+    end
+    @config.html.content_tag_selector = lambda do |tagsoup|
+      tagsoup.find('div', :attrs => { 'id', 'content' })
     end
     result = @extractor.process(html_doc('custom_tag_selectors'))
     assert_equal 'Sample Title in h1', result[:title]
@@ -61,23 +55,19 @@ class HtmlContentExtractorTest < Test::Unit::TestCase
 
   
   def test_title_from_dcmeta
-    RDig.configuration do |config|
-      config.content_extraction.html.title_tag_selector = lambda do |tagsoup|
-        tagsoup.find('meta', :attrs => { 'name', 'DC.title' })['content']
-      end
+    @config.html.title_tag_selector = lambda do |tagsoup|
+      tagsoup.find('meta', :attrs => { 'name', 'DC.title' })['content']
     end
     result = @extractor.process(html_doc('custom_tag_selectors'))
     assert_equal 'Title from DC meta data', result[:title]
   end
   
   def test_preprocessed_title
-    RDig.configuration do |config|
-      config.content_extraction.html.title_tag_selector = lambda do |tagsoup|
-        title = tagsoup.find('meta', :attrs => { 'name', 'DC.title' })['content']
-        # use only a portion of the title tag's contents if it matches our
-        # regexp:
-        title =~ /^(.*)meta data$/ ? $1.strip : title.strip
-      end
+    @config.html.title_tag_selector = lambda do |tagsoup|
+      title = tagsoup.find('meta', :attrs => { 'name', 'DC.title' })['content']
+      # use only a portion of the title tag's contents if it matches our
+      # regexp:
+      title =~ /^(.*)meta data$/ ? $1.strip : title.strip
     end
     result = @extractor.process(html_doc('custom_tag_selectors'))
     assert_equal 'Title from DC', result[:title]
