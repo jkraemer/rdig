@@ -38,6 +38,7 @@ require 'set'
 require 'net/http'
 require 'getoptlong'
 require 'tempfile'
+require 'open-uri'
 
 begin
   require 'ferret'

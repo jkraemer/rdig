@@ -105,22 +105,18 @@ module RDig
 
     def fetch
       puts "fetching #{@uri.to_s}"
-      response = do_get(@uri)
-      case response
-      when Net::HTTPSuccess
-        @content_type = response['content-type']
-        @raw_body = response.body
-        @etag = response['etag']
-        # todo externalize this (another chain ?)
-        @content = ContentExtractors.process(@raw_body, @content_type)
-        @status = :success
-      when Net::HTTPRedirection
-        @status = :redirect
-        @content = { :links => [ response['location'] ] }
-      when Net::HTTPNotFound
-        puts "got 404 for #{url}"
-      else
-        puts "don't know what to do with response: #{response}"
+      open(@uri.to_s) do |doc|
+        case doc.status.first.to_i
+        when 200
+          @etag = doc.meta['etag']
+          # puts "etag: #{@etag}"
+          @content = ContentExtractors.process(doc.read, doc.content_type)
+          @status = :success
+        when 404
+          puts "got 404 for #{url}"
+        else
+          puts "don't know what to do with response: #{doc.status.join(' : ')}"
+        end
       end
       @content ||= {}
     end

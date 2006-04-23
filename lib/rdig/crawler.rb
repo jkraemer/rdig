@@ -54,6 +54,8 @@ module RDig
       } unless doc.content[:links].nil?
 
       return unless @etag_filter.apply(doc)
+      
+      # TODO simplifizieren, ohne status auskommen
       case doc.status
       when :success
         if doc.content
@@ -115,7 +117,7 @@ module RDig
     end
 
     def apply(document)
-      return document unless document.etag 
+      return document unless (document.respond_to?(:etag) && document.etag)
       synchronize do
         @etags.add?(document.etag) ? document : nil 
       end
