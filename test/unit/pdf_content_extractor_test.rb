@@ -23,10 +23,10 @@ class PdfContentExtractorTest < Test::Unit::TestCase
   private
   def check_content(result)
     assert_not_nil result
-    assert_nil result[:title]
+    assert_equal 'PDF Test', result[:title]
     assert_nil result[:links]
     assert_not_nil result[:content]
-    assert_equal 'This is for testing PDF extraction. Another Paragraph.', result[:content]
+    assert_equal 'This is for testing PDF extraction. Some Ümläuts and a €uro. Another Paragraph.', result[:content]
   end
   
 end

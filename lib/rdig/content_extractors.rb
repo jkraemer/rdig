@@ -91,34 +91,54 @@ module RDig
         file.delete
       end
 
-      def available
-        if @available.nil?
-          @available = !find_executable(@executable).nil?
-        end
-        @available
-      end
-
+      # setting @available according to presence of external executables
+      # in initializer of ContentExtractor is needed to make this work
       def can_do(content_type)
-        available and super(content_type)
+        @available and super(content_type)
       end
     end
 
     # Extract text from pdf content.
     #
-    # Requires the pdftotext utility from the xpdf-utils package
+    # Requires the pdftotext and pdfinfo utilities from the 
+    # xpdf-utils package
     # (on debian and friends do 'apt-get install xpdf-utils')
     #
-    # TODO: use pdfinfo to get title from document
     class PdfContentExtractor < ContentExtractor
       include ExternalAppHelper
       
       def initialize
-        @executable = 'pdftotext'
         @pattern = /^application\/pdf/
+        @pdftotext = 'pdftotext'
+        @pdfinfo = 'pdfinfo'
+        @available = true
+        [ @pdftotext, @pdfinfo].each { |program|
+          unless %x{#{program} -h 2>&1} =~ /Copyright 1996/ 
+            @available = false 
+            break
+          end
+        }
+      end
+ 
+      def process(content)
+        result = {}
+        as_file(content) do |file|
+          result[:content] = get_content(file.path).strip
+          result[:title] = get_title(file.path)
+        end
+        result
+      end
+
+      def get_content(path_to_tempfile)
+        %x{#{@pdftotext} -enc UTF-8 '#{path_to_tempfile}' -}
       end
       
-      def get_content(path_to_tempfile)
-        %x{#{@executable} '#{path_to_tempfile}' -}
+      # extracts the title from pdf meta data
+      # needs pdfinfo
+      # returns the title or nil if no title was found
+      def get_title(path_to_tempfile)
+        %x{#{@pdfinfo} -enc UTF-8 '#{path_to_tempfile}'} =~ /title:\s+(.*)$/i ? $1.strip : nil
+      rescue
       end
     end
 
@@ -130,9 +150,10 @@ module RDig
       include ExternalAppHelper
       
       def initialize
-        @executable = 'wvHtml'
+        @wvhtml = 'wvHtml'
         @pattern = /^application\/msword/
         @html_extractor = HtmlContentExtractor.new
+        @available = %x{#{@wvhtml} -h 2>&1} =~ /Dom Lachowicz/
       end
       
       def process(content)
@@ -140,7 +161,7 @@ module RDig
         as_file(content) do |infile|  
           outfile = Tempfile.new('rdig')
           outfile.close
-          %x{#{@executable} --targetdir='#{File.dirname(outfile.path)}' '#{infile.path}' '#{File.basename(outfile.path)}'}
+          %x{#{@wvhtml} --targetdir='#{File.dirname(outfile.path)}' '#{infile.path}' '#{File.basename(outfile.path)}'}
           File.open(outfile.path) do |html|
             result = @html_extractor.process(html.read)
           end
