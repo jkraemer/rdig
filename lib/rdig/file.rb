@@ -3,16 +3,16 @@ class File
   
   # mime types and file extensions
   FILE_EXTENSION_MIME_TYPES = {
-    '.doc'  => 'application/msword',
-    '.html' => 'text/html',
-    '.htm'  => 'text/html',
+    'doc'  => 'application/msword',
+    'html' => 'text/html',
+    'htm'  => 'text/html',
     #'.odt'  => 'application/vnd.oasis.opendocument.text',
-    '.pdf'  => 'application/pdf',
-    '.txt'  => 'text/plain',
+    'pdf'  => 'application/pdf',
+    'txt'  => 'text/plain',
   }
  
   def content_type
-    FILE_EXTENSION_MIME_TYPES[File.extname(self.path).downcase] || 'application/octet-stream'
+    FILE_EXTENSION_MIME_TYPES[File.extname(self.path).downcase.gsub(/^\./,'')] || 'application/octet-stream'
   end
   
 end

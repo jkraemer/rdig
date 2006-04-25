@@ -38,7 +38,12 @@ module RDig
 
     def title; @content[:title] end
     def body; @content[:content] end
+    def links; @content[:links] end
     def url; @uri.to_s end
+
+    def needs_indexing?
+      has_content? && (title || body)
+    end
 
     def has_content?
       !self.content.nil?
@@ -57,25 +62,29 @@ module RDig
 
     def self.find_files(path)
       links = []
-      # Only visit files with known extensions.
-      pattern = "**/*{#{File::FILE_EXTENSION_MIME_TYPES.keys.join(',')}}"
-      Dir.glob(File.join(path, pattern), File::FNM_CASEFOLD) do |filename|
-        # Skip files in Darcs repositories or hidden directories.
-        if File.file?(filename) and not filename =~ /.*\/(_darcs|\..+?)\/.*/
+      Dir.glob(File.expand_path(File.join(path, '*'))) do |filename|
+        # Skip files not matching known mime types
+        pattern = /.+\.(#{File::FILE_EXTENSION_MIME_TYPES.keys.join('|')})$/i
+        if File.directory?(filename) || filename =~ pattern
           links << "file://#{filename}"
         end
       end
       links
     end
 
+    def file?
+      File.file? @uri.path
+    end
+
     def fetch
       if File.directory? @uri.path
-        # verzeichnis ? --> links setzen und fertich
-        @content = { :links => find_files(@uri.path) }
+        # directories are treated like a link collection
+        @content = { :links => self.class.find_files(@uri.path) }
       else
-        # sonst -> datei lesen
+        # process this file's contents
         open(@uri.path) do |file|
           @content = ContentExtractors.process(file.read, file.content_type)
+          @content[:links] = nil if @content # don't follow links inside files
         end
       end
       @content ||= {}
@@ -92,13 +101,11 @@ module RDig
     attr_reader :referring_uri
     attr_reader :status
     attr_reader :etag
-    attr_accessor :redirections
     
     # url: url of this document, may be relative to the referring doc or host.
     # referrer: uri of the document we retrieved this link from
     def initialize(args={})
       super(args)
-      @redirections = 0
       @referring_uri = args[:referrer]
     end
 

@@ -20,7 +20,7 @@ class UrlFilterTest < Test::Unit::TestCase
 
   # test default chain config
   def test_default_filterchain
-    chain = UrlFilters::FilterChain.new(RDig.filter_chain)
+    chain = UrlFilters::FilterChain.new(RDig.filter_chain[:http])
     assert_nil chain.apply(Document.create("http://www.example.com/affe.htm"))
     assert_not_nil chain.apply(Document.create("http://localhost:3000/affe.html"))
     assert_nil chain.apply(Document.create("http://localhost.com/affe.html"))

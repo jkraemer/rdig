@@ -14,10 +14,10 @@ module RDig
       end
       
       def add_to_index(document)
-        puts "add to index: #{document.uri.to_s}"
+        puts "add to index: #{document.uri.to_s}" if RDig::config.verbose
         doc = Ferret::Document::Document.new
         doc << Field.new("url", document.url, 
-                        Field::Store::YES, Field::Index::UNTOKENIZED)
+                        Field::Store::YES, Field::Index::TOKENIZED)
         doc << Field.new("title", document.title, 
                         Field::Store::YES, Field::Index::TOKENIZED)
         doc << Field.new("data",  document.body, 

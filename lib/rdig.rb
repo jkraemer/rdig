@@ -68,17 +68,28 @@ module RDig
 
   class << self
 
-    # the filter chain each URL has to run through before being crawled.
+    # the filter chains are for limiting the set of indexed documents.
+    # there are two chain types - one for http, and one for file system
+    # crawling.
+    # a document has to survive all filters in the chain to get indexed.
     def filter_chain
-      @filter_chain ||= [
-        { :maximum_redirect_filter => :max_redirects },
-        :fix_relative_uri,
-        :normalize_uri,
-        { :hostname_filter => :include_hosts },
-        { RDig::UrlFilters::UrlInclusionFilter => :include_documents },
-        { RDig::UrlFilters::UrlExclusionFilter => :exclude_documents },
-        RDig::UrlFilters::VisitedUrlFilter 
-      ]
+      @filter_chain ||= {
+        # filter chain for http crawling
+        :http => [
+          :fix_relative_uri,
+          :normalize_uri,
+          { :hostname_filter => :include_hosts },
+          { RDig::UrlFilters::UrlInclusionFilter => :include_documents },
+          { RDig::UrlFilters::UrlExclusionFilter => :exclude_documents },
+          RDig::UrlFilters::VisitedUrlFilter 
+        ],
+        # filter chain for file system crawling
+        :file => [
+          { RDig::UrlFilters::PathInclusionFilter => :include_documents },
+          { RDig::UrlFilters::PathExclusionFilter => :exclude_documents }
+        ]
+      }
+         
     end
 
     def application
