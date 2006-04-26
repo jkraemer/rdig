@@ -1,4 +1,7 @@
-0.2.2
+0.3.0
+- file system crawling
+- optional url rewriting before indexing, e.g. for linking to results 
+  via http and building the index directly from the file system
 - PDF title extraction with pdfinfo
 - removed dependency on mkmf which doesn't seem to exist in Ruby 1.8.2
 - made content extractors more flexible - instances now use a given 
