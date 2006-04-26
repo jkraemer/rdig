@@ -39,8 +39,7 @@ module RDig
     def title; @content[:title] end
     def body; @content[:content] end
     def links; @content[:links] end
-    def url; @uri.to_s end
-
+    
     def needs_indexing?
       has_content? && (title || body)
     end
@@ -110,7 +109,7 @@ module RDig
     end
 
     def fetch
-      puts "fetching #{@uri.to_s}"
+      puts "fetching #{@uri.to_s}" if RDig::config.verbose
       open(@uri.to_s) do |doc|
         case doc.status.first.to_i
         when 200
@@ -124,6 +123,9 @@ module RDig
           puts "don't know what to do with response: #{doc.status.join(' : ')}"
         end
       end
+    rescue
+      puts "error fetching #{@uri.to_s}: #{$!}" if RDig::config.verbose
+    ensure
       @content ||= {}
     end
 

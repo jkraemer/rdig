@@ -18,7 +18,7 @@ RDig.configuration do |cfg|
 
   # this is the path where the index will be stored
   # caution, existing contents of this directory will be deleted!
-  cfg.ferret.path        = '/path/to/index'
+  cfg.indexer.path        = '/path/to/index'
 
   ##################################################################
   # options you might want to set, the given values are the defaults
@@ -68,5 +68,22 @@ RDig.configuration do |cfg|
   # finishing the crawl. Set to a higher number when experiencing incomplete
   # crawls on slow sites. Don't set to 0, even when crawling a local fs.
   # cfg.crawler.wait_before_leave = 10
+
+  # indexer options
+
+  # create a new index on each run. Will append to the index if false. Use when
+  # building a single index from multiple runs, e.g. one across a website and the
+  # other a tree in a local file system
+  # config.index.create = true
+
+  # rewrite document uris before indexing them. This is useful if you're
+  # indexing on disk, but the documents should be accessible via http, e.g. from 
+  # a web based search application. By default, no rewriting takes place.
+  # example:
+  # cfg.index.rewrite_uri = lambda { |uri| 
+  #   uri.path.gsub!(/^\/base\//, '/virtual_dir/')
+  #   uri.scheme = 'http'
+  #   uri.host = 'www.mydomain.com'
+  # }
   
 end

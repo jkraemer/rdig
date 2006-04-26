@@ -11,7 +11,7 @@ class CrawlerFsTest < Test::Unit::TestCase
       cfg.crawler.start_urls = [ "file://#{@fixture_path}" ]
       cfg.crawler.num_threads = 1
       cfg.crawler.wait_before_leave = 1
-      cfg.ferret.path = index_dir
+      cfg.index.path = index_dir
       cfg.verbose = true
     end
   end

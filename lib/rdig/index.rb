@@ -6,7 +6,7 @@ module RDig
       include MonitorMixin, Ferret::Index, Ferret::Document
       
       def initialize(settings)
-        #@ferret_config = settings
+        @config = settings
         @index_writer = IndexWriter.new(settings.path,
                                         :create   => settings.create,
                                         :analyzer => settings.analyzer)
@@ -16,7 +16,9 @@ module RDig
       def add_to_index(document)
         puts "add to index: #{document.uri.to_s}" if RDig::config.verbose
         doc = Ferret::Document::Document.new
-        doc << Field.new("url", document.url, 
+        @config.rewrite_uri.call(document.uri) if @config.rewrite_uri
+        
+        doc << Field.new("url", document.uri.to_s, 
                         Field::Store::YES, Field::Index::TOKENIZED)
         doc << Field.new("title", document.title, 
                         Field::Store::YES, Field::Index::TOKENIZED)

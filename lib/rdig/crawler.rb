@@ -10,7 +10,7 @@ module RDig
 
     def run
       raise 'no start urls given!' if RDig.config.crawler.start_urls.empty?
-      @indexer = Index::Indexer.new(RDig.config.ferret)
+      @indexer = Index::Indexer.new(RDig.config.index)
       
       # check whether we are indexing on-disk or via http
       url_type = RDig.config.crawler.start_urls.first =~ /^file:\/\// ? :file : :http
@@ -30,15 +30,7 @@ module RDig
         }
       }
 
-      # dilemma: suppose we have 1 start url and two threads t1 and t2:
-      # t1 pops the start url from the queue which now is empty
-      # as the queue is empty now, t2 blocks until t1 adds the links 
-      # retrieved from his document.
-      #
-      # But we need the 'queue empty' condition as a sign for us to stop
-      # waiting for new entries, too.
-      
-      # check every now and then for an empty queue
+      # check for an empty queue every now and then 
       sleep_interval = RDig.config.crawler.wait_before_leave
       begin 
         sleep sleep_interval
@@ -53,7 +45,6 @@ module RDig
     end
 
     def process_document(doc, filterchain)
-      puts "fetching #{doc.uri.to_s}" if RDig::config.verbose
       doc.fetch
       # add links from this document to the queue
       doc.content[:links].each { |url| 

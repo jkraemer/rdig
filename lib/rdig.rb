@@ -76,6 +76,7 @@ module RDig
       @filter_chain ||= {
         # filter chain for http crawling
         :http => [
+          :scheme_filter_http,
           :fix_relative_uri,
           :normalize_uri,
           { :hostname_filter => :include_hosts },
@@ -85,6 +86,7 @@ module RDig
         ],
         # filter chain for file system crawling
         :file => [
+          :scheme_filter_file,
           { RDig::UrlFilters::PathInclusionFilter => :include_documents },
           { RDig::UrlFilters::PathExclusionFilter => :exclude_documents }
         ]
@@ -97,7 +99,7 @@ module RDig
     end
 
     def searcher
-      @searcher ||= Search::Searcher.new(config.ferret)
+      @searcher ||= Search::Searcher.new(config.index)
     end
 
     # RDig configuration
@@ -135,7 +137,7 @@ module RDig
               }
             )
           ),
-          :ferret                => OpenStruct.new( 
+          :index                 => OpenStruct.new( 
             :path                => "index/", 
             :create              => true,
             :handle_parse_errors => true,

@@ -145,8 +145,6 @@ module RDig
     end
 
 
-
-
     # checks redirect count of the given document
     # takes it out of the chain if number of redirections exceeds the
     # max_redirects setting
@@ -173,6 +171,9 @@ module RDig
         uri.path = ref_path[0..ref_path.rindex('/')] + uri.path
       end 
       return document
+    rescue
+      p document
+      p document.uri
     end
 
     def UrlFilters.hostname_filter(document, include_hosts)
@@ -188,6 +189,15 @@ module RDig
         document.uri.path << RDig.config.index_document
       end
       return document
+    end
+
+    def UrlFilters.scheme_filter_file(document)
+      return document if (document.uri.scheme.nil? || document.uri.scheme =~ /^file$/i)
+      nil
+    end
+    def UrlFilters.scheme_filter_http(document)
+      return document if (document.uri.scheme.nil? || document.uri.scheme =~ /^https?$/i)
+      nil
     end
 
   end
