@@ -18,7 +18,7 @@ RDig.configuration do |cfg|
 
   # this is the path where the index will be stored
   # caution, existing contents of this directory will be deleted!
-  cfg.indexer.path        = '/path/to/index'
+  cfg.index.path        = '/path/to/index'
 
   ##################################################################
   # options you might want to set, the given values are the defaults
