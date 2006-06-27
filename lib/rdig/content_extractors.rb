@@ -255,6 +255,8 @@ module RDig
             content << ' '
           end
         elsif element.string  # it's a Tag, and it has some content string
+          # skip inline scripts and styles
+          return nil if element.name =~ /^(script|style)$/i 
           value = element.string.strip 
           unless value.empty?
             content << value
