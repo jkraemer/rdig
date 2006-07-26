@@ -76,6 +76,8 @@ module RDig
         @documents << doc
         puts "added url #{url}" if RDig::config.verbose
       end
+    rescue
+      nil
     end
     
   end

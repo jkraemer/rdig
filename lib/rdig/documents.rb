@@ -32,7 +32,7 @@ module RDig
       begin
         @uri = URI.parse(args[:url])
       rescue URI::InvalidURIError
-        raise "Cannot create document using invalid URL: #{url}"
+        raise "Cannot create document using invalid URL: #{args[:url]}"
       end
     end
 
@@ -118,7 +118,7 @@ module RDig
           @content = ContentExtractors.process(doc.read, doc.content_type)
           @status = :success
         when 404
-          puts "got 404 for #{url}"
+          puts "got 404 for #{@uri}"
         else
           puts "don't know what to do with response: #{doc.status.join(' : ')}"
         end

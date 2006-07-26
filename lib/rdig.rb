@@ -24,7 +24,7 @@
 #++
 #
 
-RDIGVERSION = '0.3.0'
+RDIGVERSION = '0.3.1'
 
 
 require 'thread'
@@ -228,6 +228,7 @@ module RDig
 
     # Run the +rdig+ application.
     def run
+      puts "RDig version #{RDIGVERSION}"
       handle_options
       begin
         load_configfile
