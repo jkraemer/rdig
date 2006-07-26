@@ -89,11 +89,11 @@ module RDig
           @patterns = []
           if args.respond_to? :each
             args.each { |pattern| 
-              # cloning because unsure if regexps are thread safe...
-              @patterns << pattern.clone
+              # cloning because unsure if regexps are thread safe ?
+              @patterns << pattern #.clone
             }
           else
-            @patterns << args.clone
+            @patterns << args #.clone
           end
         end
       end
