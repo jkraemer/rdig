@@ -24,7 +24,7 @@
 #++
 #
 
-RDIGVERSION = '0.3.1'
+RDIGVERSION = '0.3.2'
 
 
 require 'thread'
@@ -142,7 +142,7 @@ module RDig
             :create              => true,
             :handle_parse_errors => true,
             :analyzer            => Ferret::Analysis::StandardAnalyzer.new,
-            :occur_default       => Ferret::Search::BooleanClause::Occur::MUST
+            :occur_default       => :must
           )
         )
       end

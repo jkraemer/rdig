@@ -1,3 +1,10 @@
+0.3.2
+- make RDig compatible with Ferret 0.10.x
+- won't work any more with Ferret 0.9.x and before
+
+0.3.1
+- Bug fix release: fixed handling of unparseable URLs
+
 0.3.0
 - file system crawling
 - optional url rewriting before indexing, e.g. for linking to results 

@@ -3,27 +3,26 @@ module RDig
   
     # used by the crawler to build the ferret index
     class Indexer
-      include MonitorMixin, Ferret::Index, Ferret::Document
+      include MonitorMixin
       
       def initialize(settings)
         @config = settings
-        @index_writer = IndexWriter.new(settings.path,
-                                        :create   => settings.create,
-                                        :analyzer => settings.analyzer)
+        @index_writer = Ferret::Index::IndexWriter.new(
+                          :path     => settings.path,
+                          :create   => settings.create,
+                          :analyzer => settings.analyzer)
         super() # scary, MonitorMixin won't initialize if we don't call super() here (parens matter)
       end
       
       def add_to_index(document)
         puts "add to index: #{document.uri.to_s}" if RDig::config.verbose
-        doc = Ferret::Document::Document.new
         @config.rewrite_uri.call(document.uri) if @config.rewrite_uri
-        
-        doc << Field.new("url", document.uri.to_s, 
-                        Field::Store::YES, Field::Index::TOKENIZED)
-        doc << Field.new("title", document.title, 
-                        Field::Store::YES, Field::Index::TOKENIZED)
-        doc << Field.new("data",  document.body, 
-                        Field::Store::YES, Field::Index::TOKENIZED)
+        # all stored and tokenized, should be ferret defaults
+        doc = { 
+          :url   => document.uri.to_s,
+          :title => document.title,
+          :data  => document.body
+        }
         synchronize do
           @index_writer << doc
         end

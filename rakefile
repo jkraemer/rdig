@@ -129,7 +129,7 @@ else
 
     #### Dependencies and requirements.
 
-    s.add_dependency('ferret', '>= 0.3.2')
+    s.add_dependency('ferret', '>= 0.10.0')
     s.add_dependency('rubyful_soup', '>= 1.0.4')
     #s.requirements << ""
 

@@ -5,7 +5,7 @@ to help building a site search for web sites or intranets. Internally,
 Ferret is used for the full text indexing. After creating a config file 
 for your site, the index can be built with a single call to rdig.
 
-RDig depends on Ferret (>= 0.3.2) and the RubyfulSoup library (>= 1.0.4).
+RDig depends on Ferret (>= 0.10.0) and the RubyfulSoup library (>= 1.0.4).
 
 == basic usage
 
