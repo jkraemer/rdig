@@ -42,15 +42,13 @@ require 'open-uri'
 
 begin
   require 'ferret'
-  require 'rubyful_soup'
 rescue LoadError
   require 'rubygems'
   require 'ferret'
-  require 'rubyful_soup'
 end
 
 require 'htmlentities/htmlentities'
-    
+
 require 'rdig/content_extractors'
 require 'rdig/url_filters'
 require 'rdig/search'
@@ -124,8 +122,17 @@ module RDig
             :wait_before_leave => 10
           ),
           :content_extraction  => OpenStruct.new(
-            # settings for html content extraction
-            :html => OpenStruct.new(
+            :hpricot      => OpenStruct.new(
+              # css selector for the element containing the page title
+              :title_tag_selector => 'title', 
+              # might also be a proc returning either an element or a string:
+              # :title_tag_selector => lambda { |hpricot_doc| ... }
+              :content_tag_selector => 'body'
+              # might also be a proc returning either an element or a string:
+              # :content_tag_selector => lambda { |hpricot_doc| ... }
+            ),
+            # settings for html content extraction (RubyfulSoup)
+            :rubyful_soup => OpenStruct.new(
               # select the html element that contains the content to index
               # by default, we index all inside the body tag:
               :content_tag_selector => lambda { |tagsoup|
@@ -142,7 +149,8 @@ module RDig
             :create              => true,
             :handle_parse_errors => true,
             :analyzer            => Ferret::Analysis::StandardAnalyzer.new,
-            :occur_default       => :must
+            :occur_default       => :must,
+            :default_field       => '*'
           )
         )
       end
