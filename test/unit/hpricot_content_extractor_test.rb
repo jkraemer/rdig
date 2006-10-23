@@ -1,10 +1,10 @@
 require 'test_helper'
-class HtmlContentExtractorTest < Test::Unit::TestCase
+class HpricotContentExtractorTest < Test::Unit::TestCase
   include TestHelper
 
   def setup
-    @config = OpenStruct.new(:html => RDig.config.content_extraction.html.clone)
-    @extractor = ContentExtractors::HtmlContentExtractor.new(@config)
+    @config = RDig.config.content_extraction.hpricot.clone
+    @extractor = ContentExtractors::HpricotContentExtractor.new(OpenStruct.new(:hpricot => @config))
     @nbsp = [160].pack('U') # non breaking space
   end
 
@@ -37,11 +37,11 @@ class HtmlContentExtractorTest < Test::Unit::TestCase
   end
 
   def test_custom_content_element
-    @config.html.title_tag_selector = lambda do |tagsoup|
-      tagsoup.find('h1', :attrs => { 'class', 'title' })
+    @config.title_tag_selector = lambda do |doc|
+      doc.at("h1[@class='title']")
     end
-    @config.html.content_tag_selector = lambda do |tagsoup|
-      tagsoup.find('div', :attrs => { 'id', 'content' })
+    @config.content_tag_selector = lambda do |doc|
+      doc.at("div[@id='content']")
     end
     result = @extractor.process(html_doc('custom_tag_selectors'))
     assert_equal 'Sample Title in h1', result[:title]
@@ -55,19 +55,19 @@ class HtmlContentExtractorTest < Test::Unit::TestCase
 
   
   def test_title_from_dcmeta
-    @config.html.title_tag_selector = lambda do |tagsoup|
-      tagsoup.find('meta', :attrs => { 'name', 'DC.title' })['content']
+    @config.title_tag_selector = lambda do |doc|
+      doc.at("meta[@name='DC.title']")['content']
     end
     result = @extractor.process(html_doc('custom_tag_selectors'))
     assert_equal 'Title from DC meta data', result[:title]
   end
   
   def test_preprocessed_title
-    @config.html.title_tag_selector = lambda do |tagsoup|
-      title = tagsoup.find('meta', :attrs => { 'name', 'DC.title' })['content']
+    @config.title_tag_selector = lambda do |doc|
+      title = doc.at("meta[@name='DC.title']")['content']
       # use only a portion of the title tag's contents if it matches our
       # regexp:
-      title =~ /^(.*)meta data$/ ? $1.strip : title.strip
+      (title =~ /^(.*)meta data$/ ? $1 : title).strip
     end
     result = @extractor.process(html_doc('custom_tag_selectors'))
     assert_equal 'Title from DC', result[:title]
