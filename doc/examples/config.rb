@@ -49,28 +49,21 @@ RDig.configuration do |cfg|
   # hpricot config above, and uncomment the following:
   #
   #  :rubyful_soup => OpenStruct.new(
-  #    # select the html element that contains the content to index
-  #    # by default, we index all inside the body tag:
+  #    # provide a method that returns the title of an html document
+  #    # this method may either return a tag to extract the title from, 
+  #    # or a ready-to-index string.
   #    :content_tag_selector => lambda { |tagsoup|
   #      tagsoup.html.body
   #    },
-  #    # select the html element containing the title 
+  #    # provide a method that selects the tag containing the page content you 
+  #    # want to index. Useful to avoid indexing common elements like navigation
+  #    # and page footers for every page.
   #    :title_tag_selector         => lambda { |tagsoup|
   #      tagsoup.html.head.title
   #    }
   #  )
   )
 
-  # provide a method that returns the title of an html document
-  # this method may either return a tag to extract the title from, 
-  # or a ready-to-index string.
-  # cfg.content_extraction.html.title_tag_selector = lambda { |tagsoup| tagsoup.html.head.title }
-  
-  # provide a method that selects the tag containing the page content you 
-  # want to index. Useful to avoid indexing common elements like navigation
-  # and page footers for every page.
-  # cfg.content_extraction.html.content_tag_selector = lambda { |tagsoup| tagsoup.html.body }
-  
   # crawler options
   
   # Notice: for file system crawling the include/exclude_document patterns are 
