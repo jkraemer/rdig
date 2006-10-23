@@ -1,3 +1,24 @@
+0.3.2
+- make RDig compatible with Ferret 0.10.x
+- won't work any more with Ferret 0.9.x and before
+
+0.3.1
+- Bug fix release: fixed handling of unparseable URLs
+
+0.3.0
+- file system crawling
+- optional url rewriting before indexing, e.g. for linking to results 
+  via http and building the index directly from the file system
+- PDF title extraction with pdfinfo
+- removed dependency on mkmf which doesn't seem to exist in Ruby 1.8.2
+- made content extractors more flexible - instances now use a given 
+  configuration instead of the global one. This allows the 
+  WordContentExtractor to use an HtmlContentExtractor with it's own 
+  configuration that is independent of the global config.
+
+0.2.1
+- Bugfix release
+
 0.2.0
 - add pdf and Word content extraction capabilities using the tools
   from the xpdf-utils and wv packages

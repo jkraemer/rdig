@@ -82,24 +82,24 @@ module RDig
 
 
     # base class for url inclusion / exclusion filters
-    class UrlPatternFilter
+    class PatternFilter
       # takes an Array of Regexps, or nil to disable the filter
       def initialize(args=nil)
         unless args.nil?
           @patterns = []
           if args.respond_to? :each
             args.each { |pattern| 
-              # cloning because unsure if regexps are thread safe...
-              @patterns << pattern.clone
+              # cloning because unsure if regexps are thread safe ?
+              @patterns << pattern #.clone
             }
           else
-            @patterns << args.clone
+            @patterns << args #.clone
           end
         end
       end
     end
-    class UrlExclusionFilter < UrlPatternFilter
-      # returns nil if any of the patterns matches it's URL,
+    class UrlExclusionFilter < PatternFilter
+      # returns nil if any of the patterns matches it's URI,
       # the document itself otherwise
       def apply(document)
         return document unless @patterns
@@ -109,9 +109,9 @@ module RDig
         return document
       end
     end
-    class UrlInclusionFilter < UrlPatternFilter
-      # returns nil if any of the patterns matches it's URL,
-      # the document itself otherwise
+    class UrlInclusionFilter < PatternFilter
+      # returns the document if any of the patterns matches it's URI,
+      # nil otherwise
       def apply(document)
         return document unless @patterns
         @patterns.each { |p|
@@ -121,21 +121,42 @@ module RDig
       end
     end
 
-
+    # returns nil if any of the patterns matches it's path,
+    # the document itself otherwise. Applied to real files only.
+    class PathExclusionFilter < PatternFilter
+      def apply(document)
+        return document unless (@patterns && document.file?)
+        @patterns.each { |p|
+          return nil if document.uri.path =~ p
+        }
+        return document
+      end
+    end
+    # returns the document if any of the patterns matches it's path,
+    # nil otherwise. Applied to real files only
+    class PathInclusionFilter < PatternFilter
+      def apply(document)
+        return document unless (@patterns && document.file?)
+        @patterns.each { |p|
+          return document if document.uri.path =~ p
+        }
+        return nil
+      end
+    end
 
 
     # checks redirect count of the given document
     # takes it out of the chain if number of redirections exceeds the
     # max_redirects setting
     def UrlFilters.maximum_redirect_filter(document, max_redirects)
-      return nil if document.redirections > max_redirects
+      return nil if document.respond_to?(:redirections) && document.redirections > max_redirects
       return document
     end
 
     # expands both href="/path/xyz.html" and href="affe.html"
     # to full urls
     def UrlFilters.fix_relative_uri(document)
-      return nil unless document.uri.scheme.nil? || document.uri.scheme =~ /^http/i
+      #return nil unless document.uri.scheme.nil? || document.uri.scheme =~ /^https?/i
       ref = document.referring_uri
       return document unless ref
       uri = document.uri
@@ -150,6 +171,9 @@ module RDig
         uri.path = ref_path[0..ref_path.rindex('/')] + uri.path
       end 
       return document
+    rescue
+      p document
+      p document.uri
     end
 
     def UrlFilters.hostname_filter(document, include_hosts)
@@ -165,6 +189,15 @@ module RDig
         document.uri.path << RDig.config.index_document
       end
       return document
+    end
+
+    def UrlFilters.scheme_filter_file(document)
+      return document if (document.uri.scheme.nil? || document.uri.scheme =~ /^file$/i)
+      nil
+    end
+    def UrlFilters.scheme_filter_http(document)
+      return document if (document.uri.scheme.nil? || document.uri.scheme =~ /^https?$/i)
+      nil
     end
 
   end

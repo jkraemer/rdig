@@ -5,7 +5,7 @@ to help building a site search for web sites or intranets. Internally,
 Ferret is used for the full text indexing. After creating a config file 
 for your site, the index can be built with a single call to rdig.
 
-RDig depends on Ferret (>= 0.3.2) and the RubyfulSoup library (>= 1.0.4).
+RDig depends on Ferret (>= 0.10.0) and the RubyfulSoup library (>= 1.0.4).
 
 == basic usage
 
@@ -51,9 +51,6 @@ results will be retrieved)
 from doc/examples/config.rb. The tag_selector properties are called 
 with a BeautifulSoup instance as parameter. See the RubyfulSoup Site[http://www.crummy.com/software/RubyfulSoup/documentation.html] for more info about this cool lib.
 You can also have a look at the +html_content_extractor+ unit test.
-
-See [] for API documentation of the 
-Rubyful Soup lib used 
 
 :include:doc/examples/config.rb
 

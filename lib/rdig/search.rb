@@ -12,7 +12,7 @@ module RDig
       # takes the ferret section of the rdig configuration as a parameter.
       def initialize(settings)
         @ferret_config = settings
-        @query_parser = Ferret::QueryParser.new('*', settings.marshal_dump)
+        @query_parser = Ferret::QueryParser.new(settings.marshal_dump)
         ferret_searcher
       end
   
@@ -24,7 +24,7 @@ module RDig
           @ferret_searcher = nil
         end
         unless @ferret_searcher
-          @ferret_searcher = IndexSearcher.new(@ferret_config.path)
+          @ferret_searcher = Searcher.new(@ferret_config.path)
           @query_parser.fields = @ferret_searcher.reader.get_field_names.to_a
         end
         @ferret_searcher

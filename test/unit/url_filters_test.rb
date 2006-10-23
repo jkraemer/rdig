@@ -13,17 +13,17 @@ class UrlFilterTest < Test::Unit::TestCase
     ]
     chain = UrlFilters::FilterChain.new(cfg)
 
-    assert_nil chain.apply(Document.new("http://test.host/affe.htm"))
-    assert_not_nil chain.apply(Document.new("http://test.host/affe.html"))
-    assert_nil chain.apply(Document.new("http://test.host.com/affe.html"))
+    assert_nil chain.apply(Document.create("http://test.host/affe.htm"))
+    assert_not_nil chain.apply(Document.create("http://test.host/affe.html"))
+    assert_nil chain.apply(Document.create("http://test.host.com/affe.html"))
   end
 
   # test default chain config
   def test_default_filterchain
-    chain = UrlFilters::FilterChain.new(RDig.filter_chain)
-    assert_nil chain.apply(Document.new("http://www.example.com/affe.htm"))
-    assert_not_nil chain.apply(Document.new("http://localhost:3000/affe.html"))
-    assert_nil chain.apply(Document.new("http://localhost.com/affe.html"))
+    chain = UrlFilters::FilterChain.new(RDig.filter_chain[:http])
+    assert_nil chain.apply(Document.create("http://www.example.com/affe.htm"))
+    assert_not_nil chain.apply(Document.create("http://localhost:3000/affe.html"))
+    assert_nil chain.apply(Document.create("http://localhost.com/affe.html"))
   end
   
   # check lookup of chain parameters from config
@@ -38,59 +38,59 @@ class UrlFilterTest < Test::Unit::TestCase
     ]
     chain = UrlFilters::FilterChain.new(cfg)
 
-    assert_nil chain.apply(Document.new("http://test.host/affe.htm"))
-    assert_not_nil chain.apply(Document.new("http://test.host/affe.html"))
-    assert_nil chain.apply(Document.new("http://test.host.com/affe.html"))
+    assert_nil chain.apply(Document.create("http://test.host/affe.htm"))
+    assert_not_nil chain.apply(Document.create("http://test.host/affe.html"))
+    assert_nil chain.apply(Document.create("http://test.host.com/affe.html"))
   end
   
   def test_urlpattern_filter
     f = UrlFilters::UrlInclusionFilter.new(/.*\.html$/)
-    assert_nil f.apply(Document.new("http://test.host/affe.htm"))
-    assert_not_nil f.apply(Document.new("http://test.host/affe.html"))
+    assert_nil f.apply(Document.create("http://test.host/affe.htm"))
+    assert_not_nil f.apply(Document.create("http://test.host/affe.html"))
     f = UrlFilters::UrlExclusionFilter.new([ /.*\.html$/, /.*\.aspx/ ])
-    assert_not_nil f.apply(Document.new("http://test.host/affe.htm"))
-    assert_nil f.apply(Document.new("http://test.host/affe.html"))
-    assert_nil f.apply(Document.new("http://test.host/affe.aspx"))
+    assert_not_nil f.apply(Document.create("http://test.host/affe.htm"))
+    assert_nil f.apply(Document.create("http://test.host/affe.html"))
+    assert_nil f.apply(Document.create("http://test.host/affe.aspx"))
     f = UrlFilters::UrlExclusionFilter.new([ /http:\/\/[^\/]+\/dir1/ ])
-    assert_nil f.apply(Document.new("http://test.host/dir1/affe.aspx"))
-    assert_not_nil f.apply(Document.new("http://test.host/dir2/dir1/affe.htm"))
-    assert_not_nil f.apply(Document.new("http://test.host/affe.htm"))
-    assert_not_nil f.apply(Document.new("http://test.host/dir2/affe.htm"))
+    assert_nil f.apply(Document.create("http://test.host/dir1/affe.aspx"))
+    assert_not_nil f.apply(Document.create("http://test.host/dir2/dir1/affe.htm"))
+    assert_not_nil f.apply(Document.create("http://test.host/affe.htm"))
+    assert_not_nil f.apply(Document.create("http://test.host/dir2/affe.htm"))
     f = UrlFilters::UrlExclusionFilter.new([ /\/dir1/ ])
-    assert_nil f.apply(Document.new("http://test.host/dir1/affe.aspx"))
-    assert_nil f.apply(Document.new("http://test.host/dir2/dir1/affe.htm"))
-    assert_not_nil f.apply(Document.new("http://test.host/affe.htm"))
-    assert_not_nil f.apply(Document.new("http://test.host/dir2/affe.htm"))
+    assert_nil f.apply(Document.create("http://test.host/dir1/affe.aspx"))
+    assert_nil f.apply(Document.create("http://test.host/dir2/dir1/affe.htm"))
+    assert_not_nil f.apply(Document.create("http://test.host/affe.htm"))
+    assert_not_nil f.apply(Document.create("http://test.host/dir2/affe.htm"))
   end
 
   def test_hostname_filter
     include_hosts = [ 'test.host', 'localhost' ]
-    assert_nil UrlFilters.hostname_filter(Document.new('http://google.com/'), include_hosts)
-    assert_not_nil UrlFilters.hostname_filter(Document.new('http://test.host/file.html'), include_hosts)
-    assert_not_nil UrlFilters.hostname_filter(Document.new('http://localhost/file.html'), include_hosts)
+    assert_nil UrlFilters.hostname_filter(Document.create('http://google.com/'), include_hosts)
+    assert_not_nil UrlFilters.hostname_filter(Document.create('http://test.host/file.html'), include_hosts)
+    assert_not_nil UrlFilters.hostname_filter(Document.create('http://localhost/file.html'), include_hosts)
   end
 
   def test_fix_relative_uri
-    doc = Document.new('http://test.host/dir/file.html')
+    doc = Document.create('http://test.host/dir/file.html')
     assert_equal('http://test.host/dir/another.html',
-                  UrlFilters.fix_relative_uri(Document.new('another.html', doc.uri)).uri.to_s)
+                  UrlFilters.fix_relative_uri(Document.create('another.html', doc.uri)).uri.to_s)
     assert_equal('http://test.host/dir/../another.html',
-                  UrlFilters.fix_relative_uri(Document.new('../another.html', doc.uri)).uri.to_s)
+                  UrlFilters.fix_relative_uri(Document.create('../another.html', doc.uri)).uri.to_s)
     assert_equal('http://test.host/dir/another.html',
-                  UrlFilters.fix_relative_uri(Document.new('/dir/another.html', doc.uri)).uri.to_s)
+                  UrlFilters.fix_relative_uri(Document.create('/dir/another.html', doc.uri)).uri.to_s)
     assert_equal('http://test.host/dir/another.html',
-                  UrlFilters.fix_relative_uri(Document.new('http://test.host/dir/another.html', doc.uri)).uri.to_s)
+                  UrlFilters.fix_relative_uri(Document.create('http://test.host/dir/another.html', doc.uri)).uri.to_s)
     assert_equal('HTTP://test.host/dir/another.html',
-                  UrlFilters.fix_relative_uri(Document.new('HTTP://test.host/dir/another.html', doc.uri)).uri.to_s)
-    doc = Document.new('https://test.host/dir/')
+                  UrlFilters.fix_relative_uri(Document.create('HTTP://test.host/dir/another.html', doc.uri)).uri.to_s)
+    doc = Document.create('https://test.host/dir/')
     assert_equal('https://test.host/dir/another.html',
-                  UrlFilters.fix_relative_uri(Document.new('another.html', doc.uri)).uri.to_s)
-    doc = Document.new('https://test.host/')
+                  UrlFilters.fix_relative_uri(Document.create('another.html', doc.uri)).uri.to_s)
+    doc = Document.create('https://test.host/')
     assert_equal('https://test.host/another.html',
-                  UrlFilters.fix_relative_uri(Document.new('another.html', doc.uri)).uri.to_s)
-    doc = Document.new('https://test.host')
+                  UrlFilters.fix_relative_uri(Document.create('another.html', doc.uri)).uri.to_s)
+    doc = Document.create('https://test.host')
     assert_equal('https://test.host/another.html',
-                  UrlFilters.fix_relative_uri(Document.new('another.html', doc.uri)).uri.to_s)
+                  UrlFilters.fix_relative_uri(Document.create('another.html', doc.uri)).uri.to_s)
   end
 end
 

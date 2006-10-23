@@ -24,7 +24,7 @@
 #++
 #
 
-RDIGVERSION = '0.2.0'
+RDIGVERSION = '0.3.2'
 
 
 require 'thread'
@@ -38,27 +38,25 @@ require 'set'
 require 'net/http'
 require 'getoptlong'
 require 'tempfile'
-# mkmf gives us the handy find_executable method used to check for helper
-# programs:
-require 'mkmf'      
+require 'open-uri'
 
 begin
-  require 'rubyful_soup'
   require 'ferret'
 rescue LoadError
   require 'rubygems'
-  require 'rubyful_soup'
   require 'ferret'
 end
 
 require 'htmlentities/htmlentities'
 
-require 'rdig/http_client'
 require 'rdig/content_extractors'
 require 'rdig/url_filters'
 require 'rdig/search'
 require 'rdig/index'
+require 'rdig/file'
+require 'rdig/documents'
 require 'rdig/crawler'
+
 
 $KCODE = 'u'
 require 'jcode'
@@ -68,17 +66,30 @@ module RDig
 
   class << self
 
-    # the filter chain each URL has to run through before being crawled.
+    # the filter chains are for limiting the set of indexed documents.
+    # there are two chain types - one for http, and one for file system
+    # crawling.
+    # a document has to survive all filters in the chain to get indexed.
     def filter_chain
-      @filter_chain ||= [
-        { :maximum_redirect_filter => :max_redirects },
-        :fix_relative_uri,
-        :normalize_uri,
-        { :hostname_filter => :include_hosts },
-        { RDig::UrlFilters::UrlInclusionFilter => :include_documents },
-        { RDig::UrlFilters::UrlExclusionFilter => :exclude_documents },
-        RDig::UrlFilters::VisitedUrlFilter 
-      ]
+      @filter_chain ||= {
+        # filter chain for http crawling
+        :http => [
+          :scheme_filter_http,
+          :fix_relative_uri,
+          :normalize_uri,
+          { :hostname_filter => :include_hosts },
+          { RDig::UrlFilters::UrlInclusionFilter => :include_documents },
+          { RDig::UrlFilters::UrlExclusionFilter => :exclude_documents },
+          RDig::UrlFilters::VisitedUrlFilter 
+        ],
+        # filter chain for file system crawling
+        :file => [
+          :scheme_filter_file,
+          { RDig::UrlFilters::PathInclusionFilter => :include_documents },
+          { RDig::UrlFilters::PathExclusionFilter => :exclude_documents }
+        ]
+      }
+         
     end
 
     def application
@@ -86,7 +97,7 @@ module RDig
     end
 
     def searcher
-      @searcher ||= Search::Searcher.new(config.ferret)
+      @searcher ||= Search::Searcher.new(config.index)
     end
 
     # RDig configuration
@@ -111,8 +122,17 @@ module RDig
             :wait_before_leave => 10
           ),
           :content_extraction  => OpenStruct.new(
-            # settings for html content extraction
-            :html => OpenStruct.new(
+            :hpricot      => OpenStruct.new(
+              # css selector for the element containing the page title
+              :title_tag_selector => 'title', 
+              # might also be a proc returning either an element or a string:
+              # :title_tag_selector => lambda { |hpricot_doc| ... }
+              :content_tag_selector => 'body'
+              # might also be a proc returning either an element or a string:
+              # :content_tag_selector => lambda { |hpricot_doc| ... }
+            ),
+            # settings for html content extraction (RubyfulSoup)
+            :rubyful_soup => OpenStruct.new(
               # select the html element that contains the content to index
               # by default, we index all inside the body tag:
               :content_tag_selector => lambda { |tagsoup|
@@ -124,12 +144,13 @@ module RDig
               }
             )
           ),
-          :ferret                => OpenStruct.new( 
+          :index                 => OpenStruct.new( 
             :path                => "index/", 
             :create              => true,
             :handle_parse_errors => true,
             :analyzer            => Ferret::Analysis::StandardAnalyzer.new,
-            :occur_default       => Ferret::Search::BooleanClause::Occur::MUST
+            :occur_default       => :must,
+            :default_field       => '*'
           )
         )
       end
@@ -215,6 +236,7 @@ module RDig
 
     # Run the +rdig+ application.
     def run
+      puts "RDig version #{RDIGVERSION}"
       handle_options
       begin
         load_configfile
@@ -223,6 +245,8 @@ module RDig
         fail "No Configfile found!\n#{$!}"
         
       end    
+
+      puts "using Ferret #{Ferret::VERSION}"
 
       if options.query
         # query the index
