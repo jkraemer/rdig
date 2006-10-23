@@ -122,6 +122,7 @@ module RDig
             :wait_before_leave => 10
           ),
           :content_extraction  => OpenStruct.new(
+            # settings for html content extraction (hpricot)
             :hpricot      => OpenStruct.new(
               # css selector for the element containing the page title
               :title_tag_selector => 'title', 
@@ -130,19 +131,20 @@ module RDig
               :content_tag_selector => 'body'
               # might also be a proc returning either an element or a string:
               # :content_tag_selector => lambda { |hpricot_doc| ... }
-            ),
-            # settings for html content extraction (RubyfulSoup)
-            :rubyful_soup => OpenStruct.new(
-              # select the html element that contains the content to index
-              # by default, we index all inside the body tag:
-              :content_tag_selector => lambda { |tagsoup|
-                tagsoup.html.body
-              },
-              # select the html element containing the title 
-              :title_tag_selector         => lambda { |tagsoup|
-                tagsoup.html.head.title
-              }
             )
+            #,
+            # # settings for html content extraction (RubyfulSoup)
+            # :rubyful_soup => OpenStruct.new(
+            #  # select the html element that contains the content to index
+            #  # by default, we index all inside the body tag:
+            #  :content_tag_selector => lambda { |tagsoup|
+            #    tagsoup.html.body
+            #  },
+            #  # select the html element containing the title 
+            #  :title_tag_selector         => lambda { |tagsoup|
+            #    tagsoup.html.head.title
+            #  }
+            # )
           ),
           :index                 => OpenStruct.new( 
             :path                => "index/", 

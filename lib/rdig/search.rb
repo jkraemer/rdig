@@ -24,8 +24,8 @@ module RDig
           @ferret_searcher = nil
         end
         unless @ferret_searcher
-          @ferret_searcher = Searcher.new(@ferret_config.path)
-          @query_parser.fields = @ferret_searcher.reader.get_field_names.to_a
+          @ferret_searcher = Ferret::Search::Searcher.new(@ferret_config.path)
+          @query_parser.fields = @ferret_searcher.reader.field_names.to_a
         end
         @ferret_searcher
       end
@@ -43,16 +43,15 @@ module RDig
         result = {}
         query = query_parser.parse(query) if query.is_a?(String)
         puts "Query: #{query}"
-        hits = ferret_searcher.search(query, options)
-        result[:hitcount] = hits.total_hits
         results = []
-        hits.each { |doc_id,score|
-          doc = ferret_searcher.reader.get_document doc_id
+        searcher = ferret_searcher
+        result[:hitcount] = searcher.search_each(query, options) do |doc_id, score|
+          doc = searcher[doc_id]
           results << { :score => score, 
-                      :title => doc['title'], 
-                      :url => doc['url'], 
-                      :extract => build_extract(doc['data']) }
-        }
+                       :title => doc[:title], 
+                       :url => doc[:url], 
+                       :extract => build_extract(doc[:data]) }
+        end
         result[:list] = results
         result
       end
