@@ -24,9 +24,9 @@ module RDig
       def process(content)
         doc = Hpricot(content)
         { 
-          :title => extract_title(doc),
+          :title => extract_title(doc).decode_entities,
           :links => extract_links(doc),
-          :content => extract_content(doc)
+          :content => extract_content(doc).decode_entities
         }
       end
 

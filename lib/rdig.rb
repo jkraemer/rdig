@@ -49,14 +49,6 @@ end
 
 require 'htmlentities/htmlentities'
 
-require 'rdig/content_extractors'
-require 'rdig/url_filters'
-require 'rdig/search'
-require 'rdig/index'
-require 'rdig/file'
-require 'rdig/documents'
-require 'rdig/crawler'
-
 
 $KCODE = 'u'
 require 'jcode'
@@ -271,3 +263,13 @@ module RDig
     end
   end
 end
+
+require 'rdig/content_extractors'
+require 'rdig/url_filters'
+require 'rdig/search'
+require 'rdig/index'
+require 'rdig/file'
+require 'rdig/documents'
+require 'rdig/crawler'
+
+

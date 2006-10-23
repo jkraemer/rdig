@@ -27,7 +27,40 @@ RDig.configuration do |cfg|
   # cfg.verbose = false
   
   # content extraction options
+  cfg.content_extraction = OpenStruct.new(
   
+  # HPRICOT configuration
+  # this is the html parser used by default from RDig 0.3.3 upwards.
+  # Hpricot by far outperforms Rubyful Soup, and is at least as flexible when
+  # it comes to selection of portions of the html documents.
+    :hpricot      => OpenStruct.new(
+      # css selector for the element containing the page title
+      :title_tag_selector => 'title', 
+      # might also be a proc returning either an element or a string:
+      # :title_tag_selector => lambda { |hpricot_doc| ... }
+      :content_tag_selector => 'body'
+      # might also be a proc returning either an element or a string:
+      # :content_tag_selector => lambda { |hpricot_doc| ... }
+    )
+  
+  # RUBYFUL SOUP
+  # This is a powerful, but somewhat slow, ruby-only html parsing lib which was
+  # RDig's default html parser up to version 0.3.2. To use it, comment the
+  # hpricot config above, and uncomment the following:
+  #
+  #  :rubyful_soup => OpenStruct.new(
+  #    # select the html element that contains the content to index
+  #    # by default, we index all inside the body tag:
+  #    :content_tag_selector => lambda { |tagsoup|
+  #      tagsoup.html.body
+  #    },
+  #    # select the html element containing the title 
+  #    :title_tag_selector         => lambda { |tagsoup|
+  #      tagsoup.html.head.title
+  #    }
+  #  )
+  )
+
   # provide a method that returns the title of an html document
   # this method may either return a tag to extract the title from, 
   # or a ready-to-index string.

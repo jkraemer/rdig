@@ -36,9 +36,10 @@ module RDig
       # for more information on queries.
       # A Ferret::Search::Query instance may be given, too.
       # 
-      # Otions are:
-      # first_doc:: first document in result list to retrieve (0-based). The default is 0.
-      # num_docs:: number of documents to retrieve. The default is 10.
+      # Some of the more often used otions are:
+      # offset:: first document in result list to retrieve (0-based). The default is 0.
+      # limit:: number of documents to retrieve. The default is 10.
+      # Please see the Ferret::Search::Searcher API for more options.
       def search(query, options={})
         result = {}
         query = query_parser.parse(query) if query.is_a?(String)

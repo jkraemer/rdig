@@ -16,7 +16,7 @@ module RDig
       
       def self.inherited(extractor)
         super(extractor)
-        puts("discovered content extractor class: #{extractor}")
+        puts("discovered content extractor class: #{extractor}") if RDig.config.verbose
         self.extractors << extractor
       end
 
@@ -75,7 +75,11 @@ module RDig
   end
 end
 
-# load stock content extractors
+# load content extractors
 Dir["#{File.expand_path(File.dirname(__FILE__))}/content_extractors/**/*.rb"].each do |f|
-  require f
+  begin
+    require f
+  rescue
+    puts "error loading #{f}: #{$!}"
+  end
 end
