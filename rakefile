@@ -125,12 +125,16 @@ else
     to help building a site search for web sites or intranets. Internally,
     Ferret is used for the full text indexing. After creating a config file 
     for your site, the index can be built with a single call to rdig.
+    For HTML page crawling, hpricot and rubyful_soup are supported.
     EOF
 
     #### Dependencies and requirements.
 
     s.add_dependency('ferret', '>= 0.10.0')
-    s.add_dependency('rubyful_soup', '>= 1.0.4')
+    # TODO: check if there is anything like 'suggested' instead of required, or
+    # ORed dependencies...
+    #s.add_dependency('rubyful_soup', '>= 1.0.4')
+    #s.add_dependency('hpricot', '>= 0.4')
     #s.requirements << ""
 
     #### Which files are to be included in this gem?  Everything!  (Except CVS directories.)

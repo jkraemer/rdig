@@ -3,7 +3,13 @@ class RubyfulSoupContentExtractorTest < Test::Unit::TestCase
   include TestHelper
 
   def setup
-    @config = RDig.config.content_extraction.rubyful_soup.clone
+    @config =  OpenStruct.new(
+              :content_tag_selector => lambda { |tagsoup|
+                tagsoup.html.body
+              },
+              :title_tag_selector         => lambda { |tagsoup|
+                tagsoup.html.head.title
+              })
     @extractor = ContentExtractors::RubyfulSoupContentExtractor.new(OpenStruct.new(:rubyful_soup => @config))
     @nbsp = [160].pack('U') # non breaking space
   end
