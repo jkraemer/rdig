@@ -16,13 +16,13 @@ module RDig
       
       def self.inherited(extractor)
         super(extractor)
-        puts("discovered content extractor class: #{extractor}") if RDig.config.verbose
         self.extractors << extractor
       end
 
       def self.extractors; @@extractors ||= [] end
       def self.extractor_instances
         @@extractor_instances ||= extractors.map { |ex_class| 
+          puts "initializing content extractor: #{ex_class}" if RDig.configuration.verbose
           ex_class.new(RDig.configuration.content_extraction) 
         }
       end
@@ -32,7 +32,6 @@ module RDig
           return extractor.process(content) if extractor.can_do(content_type)
         }
         puts "unable to handle content type #{content_type}"
-        nil
       end
 
       def initialize(config)

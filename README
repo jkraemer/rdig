@@ -5,7 +5,11 @@ to help building a site search for web sites or intranets. Internally,
 Ferret is used for the full text indexing. After creating a config file 
 for your site, the index can be built with a single call to rdig.
 
-RDig depends on Ferret (>= 0.10.0) and the RubyfulSoup library (>= 1.0.4).
+RDig depends on Ferret (>= 0.10.0) and, for parsing HTML, on either
+Hpricot (>= 0.4) or the RubyfulSoup library (>= 1.0.4). As I know no way 
+to specify such an OR dependency in a gem specification, the gem depends
+on Hpricot. If this is a problem for you, install the gem with --force and 
+manually do a +gem install rubyful_soup+.
 
 == basic usage
 
