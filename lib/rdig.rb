@@ -24,7 +24,7 @@
 #++
 #
 
-RDIGVERSION = '0.3.3'
+RDIGVERSION = '0.3.4'
 
 
 require 'thread'
