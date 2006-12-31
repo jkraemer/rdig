@@ -5,6 +5,7 @@ rescue LoadError
   require 'hpricot'
 end
   
+if defined?(Hpricot)
 module RDig
   module ContentExtractors
 
@@ -24,7 +25,7 @@ module RDig
       def process(content)
         doc = Hpricot(content)
         { 
-          :title => extract_title(doc).decode_entities,
+          :title => extract_title(doc).decode_entities.strip,
           :links => extract_links(doc),
           :content => extract_content(doc).decode_entities
         }
@@ -96,4 +97,5 @@ module RDig
     end
 
   end
+end
 end

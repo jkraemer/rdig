@@ -2,8 +2,10 @@ begin
   require 'rubyful_soup'
 rescue LoadError
   require 'rubygems'
-  require 'rubyful_soup'
+  require 'rubyful_soup' rescue nil
 end
+
+if defined?(BeautifulSoup)
   
 # override some methods concered with entity resolving
 # to convert them to strings
@@ -144,4 +146,6 @@ module RDig
     end
 
   end
+end
+
 end
