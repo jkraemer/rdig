@@ -77,10 +77,8 @@ end
 # load content extractors
 Dir["#{File.expand_path(File.dirname(__FILE__))}/content_extractors/**/*.rb"].each do |f|
   begin
-    puts "requiring #{f}"
     require f 
-    puts "done"
   rescue LoadError
-    puts "error loading #{f}: #{$!}"
+    puts "could not load #{f}: #{$!}"
   end
 end
