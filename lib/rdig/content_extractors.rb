@@ -23,8 +23,8 @@ module RDig
       def self.extractor_instances
         @@extractor_instances ||= extractors.map { |ex_class| 
           puts "initializing content extractor: #{ex_class}" if RDig.configuration.verbose
-          ex_class.new(RDig.configuration.content_extraction) 
-        }
+          ex_class.new(RDig.configuration.content_extraction) rescue nil
+        }.compact
       end
       
       def self.process(content, content_type)
@@ -77,8 +77,8 @@ end
 # load content extractors
 Dir["#{File.expand_path(File.dirname(__FILE__))}/content_extractors/**/*.rb"].each do |f|
   begin
-    require f
-  rescue
-    puts "error loading #{f}: #{$!}"
+    require f 
+  rescue LoadError
+    puts "could not load #{f}: #{$!}"
   end
 end
