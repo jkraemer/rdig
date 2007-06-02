@@ -100,7 +100,7 @@ RDig.configuration do |cfg|
   # create a new index on each run. Will append to the index if false. Use when
   # building a single index from multiple runs, e.g. one across a website and the
   # other a tree in a local file system
-  # config.index.create = true
+  # cfg.index.create = true
 
   # rewrite document uris before indexing them. This is useful if you're
   # indexing on disk, but the documents should be accessible via http, e.g. from 

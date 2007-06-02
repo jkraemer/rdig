@@ -98,6 +98,7 @@ module RDig
         end
       end
     end
+
     class UrlExclusionFilter < PatternFilter
       # returns nil if any of the patterns matches it's URI,
       # the document itself otherwise

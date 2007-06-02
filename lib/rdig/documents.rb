@@ -61,12 +61,10 @@ module RDig
 
     def self.find_files(path)
       links = []
+      pattern = /.+\.(#{File::FILE_EXTENSION_MIME_TYPES.keys.join('|')})$/i
       Dir.glob(File.expand_path(File.join(path, '*'))) do |filename|
         # Skip files not matching known mime types
-        pattern = /.+\.(#{File::FILE_EXTENSION_MIME_TYPES.keys.join('|')})$/i
-        if File.directory?(filename) || filename =~ pattern
-          links << "file://#{filename}"
-        end
+        links << "file://#{filename}" if File.directory?(filename) || filename =~ pattern
       end
       links
     end
