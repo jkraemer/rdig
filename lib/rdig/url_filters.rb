@@ -80,6 +80,15 @@ module RDig
       end
     end
 
+    class DepthFilter
+      def initialize(max_depth = nil)
+        @max_depth = max_depth
+      end
+      def apply(document)
+        return document if @max_depth.nil? || document.depth <= @max_depth
+      end
+    end
+
 
     # base class for url inclusion / exclusion filters
     class PatternFilter
@@ -178,8 +187,8 @@ module RDig
     end
 
     def UrlFilters.hostname_filter(document, include_hosts)
-      return document if include_hosts.include?(document.uri.host)
-      return nil
+      RDig.logger.debug "hostname_filter: #{include_hosts}"
+      return document if include_hosts.empty? || include_hosts.include?(document.uri.host)
     end
 
     def UrlFilters.normalize_uri(document)

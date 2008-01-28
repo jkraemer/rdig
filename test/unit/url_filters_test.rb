@@ -73,24 +73,24 @@ class UrlFilterTest < Test::Unit::TestCase
   def test_fix_relative_uri
     doc = Document.create('http://test.host/dir/file.html')
     assert_equal('http://test.host/dir/another.html',
-                  UrlFilters.fix_relative_uri(Document.create('another.html', doc.uri)).uri.to_s)
+                  UrlFilters.fix_relative_uri(doc.create_child('another.html')).uri.to_s)
     assert_equal('http://test.host/dir/../another.html',
-                  UrlFilters.fix_relative_uri(Document.create('../another.html', doc.uri)).uri.to_s)
+                  UrlFilters.fix_relative_uri(doc.create_child('../another.html')).uri.to_s)
     assert_equal('http://test.host/dir/another.html',
-                  UrlFilters.fix_relative_uri(Document.create('/dir/another.html', doc.uri)).uri.to_s)
+                  UrlFilters.fix_relative_uri(doc.create_child('/dir/another.html')).uri.to_s)
     assert_equal('http://test.host/dir/another.html',
-                  UrlFilters.fix_relative_uri(Document.create('http://test.host/dir/another.html', doc.uri)).uri.to_s)
+                  UrlFilters.fix_relative_uri(doc.create_child('http://test.host/dir/another.html')).uri.to_s)
     assert_equal('HTTP://test.host/dir/another.html',
-                  UrlFilters.fix_relative_uri(Document.create('HTTP://test.host/dir/another.html', doc.uri)).uri.to_s)
+                  UrlFilters.fix_relative_uri(doc.create_child('HTTP://test.host/dir/another.html')).uri.to_s)
     doc = Document.create('https://test.host/dir/')
     assert_equal('https://test.host/dir/another.html',
-                  UrlFilters.fix_relative_uri(Document.create('another.html', doc.uri)).uri.to_s)
+                  UrlFilters.fix_relative_uri(doc.create_child('another.html')).uri.to_s)
     doc = Document.create('https://test.host/')
     assert_equal('https://test.host/another.html',
-                  UrlFilters.fix_relative_uri(Document.create('another.html', doc.uri)).uri.to_s)
+                  UrlFilters.fix_relative_uri(doc.create_child('another.html')).uri.to_s)
     doc = Document.create('https://test.host')
     assert_equal('https://test.host/another.html',
-                  UrlFilters.fix_relative_uri(Document.create('another.html', doc.uri)).uri.to_s)
+                  UrlFilters.fix_relative_uri(doc.create_child('another.html')).uri.to_s)
   end
 end
 

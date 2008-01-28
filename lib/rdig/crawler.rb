@@ -6,6 +6,7 @@ module RDig
     def initialize
       @documents = Queue.new
       @etag_filter = ETagFilter.new
+      @logger = RDig.logger
     end
 
     def run
@@ -18,7 +19,7 @@ module RDig
       
       filterchain = UrlFilters::FilterChain.new(chain_config)
       RDig.config.crawler.start_urls.each { |url| add_url(url, filterchain) }
-      
+
       num_threads = RDig.config.crawler.num_threads
       group = ThreadsWait.new
       num_threads.times { |i|
@@ -45,6 +46,7 @@ module RDig
     end
 
     def process_document(doc, filterchain)
+      @logger.debug "processing document #{doc}"
       doc.fetch
       # add links from this document to the queue
       doc.content[:links].each { |url| 
@@ -54,8 +56,8 @@ module RDig
       return unless @etag_filter.apply(doc)
       @indexer << doc if doc.needs_indexing?
     rescue
-      puts "error processing document #{doc.uri.to_s}: #{$!}"
-      puts "Trace: #{$!.backtrace.join("\n")}" if RDig::config.verbose
+      @logger.error "error processing document #{doc.uri.to_s}: #{$!}"
+      @logger.debug "Trace: #{$!.backtrace.join("\n")}"
     end
 
     
@@ -64,17 +66,19 @@ module RDig
     # processing
     def add_url(url, filterchain, referring_document = nil)
       return if url.nil? || url.empty?
-      if referring_document and referring_document.uri.scheme =~ /^https?/i
-        doc = Document.create(url, referring_document.uri)
+
+      @logger.debug "add_url #{url}"
+      doc = if referring_document
+        referring_document.create_child(url)
       else
-        doc = Document.create(url)
+        Document.create(url)
       end
 
       doc = filterchain.apply(doc)
         
       if doc
         @documents << doc
-        puts "added url #{url}" if RDig::config.verbose
+        @logger.debug "url #{url} survived filterchain"
       end
     rescue
       nil

@@ -2,6 +2,12 @@ RDig.configuration do |cfg|
 
   ##################################################################
   # options you really should set
+
+  # log file location
+  cfg.log_file = '/tmp/rdig.log'
+
+  # log level, set to :debug, :info, :warn or :error
+  cfg.log_level = :info
   
   # provide one or more URLs for the crawler to start from
   cfg.crawler.start_urls = [ 'http://www.example.com/' ]
@@ -94,6 +100,10 @@ RDig.configuration do |cfg|
   # finishing the crawl. Set to a higher number when experiencing incomplete
   # crawls on slow sites. Don't set to 0, even when crawling a local fs.
   # cfg.crawler.wait_before_leave = 10
+
+  # limit the crawling depth. Default: nil (unlimited)
+  # Set to 0 to only index the start_urls.
+  # cfg.crawler.max_depth = nil
 
   # indexer options
 

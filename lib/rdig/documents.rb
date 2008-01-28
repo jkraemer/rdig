@@ -9,28 +9,21 @@ module RDig
     attr_reader :content
     attr_reader :content_type
     
-    def self.create(url, referrer_uri = nil)
-      # a referrer is a clear enough hint to create an HttpDocument
-      if referrer_uri && referrer_uri.scheme =~ /^https?$/i
-        return HttpDocument.new(:url => url, :referrer => referrer_uri)
-      end
-        
-      case url
-      when /^https?:\/\//i
-        HttpDocument.new(:url => url, :referrer => referrer_uri) if referrer_uri.nil?
-      when /^file:\/\//i
-        # files don't have referrers - the check for nil prevents us from being
-        # tricked into indexing local files by file:// links in the web site
-        # we index.
-        FileDocument.new(:url => url) if referrer_uri.nil?
+    def self.create(url)
+      return case url
+        when /^https?:\/\//i
+          HttpDocument.new(:uri => url)
+        when /^file:\/\//i
+          FileDocument.new(:uri => url)
       end
     end
 
     # url: url of this document, may be relative to the referring doc or host.
     # referrer: uri of the document we retrieved this link from
     def initialize(args)
+      RDig.logger.debug "initialize: #{args.inspect}"
       begin
-        @uri = URI.parse(args[:url])
+        @uri = URI.parse(args[:uri])
       rescue URI::InvalidURIError
         raise "Cannot create document using invalid URL: #{args[:url]}"
       end
@@ -57,6 +50,10 @@ module RDig
   class FileDocument < Document
     def initialize(args={})
       super(args)
+    end
+
+    def create_child(uri)
+      FileDocument.new(:url => uri)
     end
 
     def self.find_files(path)
@@ -95,19 +92,26 @@ module RDig
   #
   class HttpDocument < Document
 
+    # counts how far this document is away from one of the start urls. Used to limit crawling by depth.
+    attr_reader :depth         
     attr_reader :referring_uri
     attr_reader :status
     attr_reader :etag
+
+    def create_child(uri)
+      HttpDocument.new(:uri => uri, :referrer => self.uri, :depth => self.depth+1) unless uri =~ /^file:\/\//i 
+    end
     
     # url: url of this document, may be relative to the referring doc or host.
     # referrer: uri of the document we retrieved this link from
     def initialize(args={})
       super(args)
       @referring_uri = args[:referrer]
+      @depth = args[:depth] || 0
     end
 
     def fetch
-      puts "fetching #{@uri.to_s}" if RDig::config.verbose
+      RDig.logger.debug "fetching #{@uri.to_s}"
       open(@uri.to_s) do |doc|
         case doc.status.first.to_i
         when 200
@@ -116,13 +120,13 @@ module RDig
           @content = ContentExtractors.process(doc.read, doc.content_type)
           @status = :success
         when 404
-          puts "got 404 for #{@uri}"
+          RDig.logger.info "got 404 for #{@uri}"
         else
-          puts "don't know what to do with response: #{doc.status.join(' : ')}"
+          RDig.logger.info "don't know what to do with response: #{doc.status.join(' : ')}"
         end
       end
     rescue
-      puts "error fetching #{@uri.to_s}: #{$!}" if RDig::config.verbose
+      RDig.logger.warn "error fetching #{@uri.to_s}: #{$!}"
     ensure
       @content ||= {}
     end

@@ -39,6 +39,7 @@ require 'net/http'
 require 'getoptlong'
 require 'tempfile'
 require 'open-uri'
+require 'logger'
 
 begin
   require 'ferret'
@@ -69,10 +70,11 @@ module RDig
           :scheme_filter_http,
           :fix_relative_uri,
           :normalize_uri,
+          { RDig::UrlFilters::DepthFilter => :max_depth },
           { :hostname_filter => :include_hosts },
           { RDig::UrlFilters::UrlInclusionFilter => :include_documents },
           { RDig::UrlFilters::UrlExclusionFilter => :exclude_documents },
-          RDig::UrlFilters::VisitedUrlFilter 
+          RDig::UrlFilters::VisitedUrlFilter
         ],
         # filter chain for file system crawling
         :file => [
@@ -103,6 +105,8 @@ module RDig
         yield configuration
       else
         @config ||= OpenStruct.new(
+          :log_file  => '/tmp/rdig.log',
+          :log_level => :warn,
           :crawler           => OpenStruct.new(
             :start_urls        => [ "http://localhost:3000/" ],
             :include_hosts     => [ "localhost" ],
@@ -111,6 +115,7 @@ module RDig
             :index_document    => nil,
             :num_threads       => 2,
             :max_redirects     => 5,
+            :max_depth         => nil,
             :wait_before_leave => 10
           ),
           :content_extraction  => OpenStruct.new(
@@ -151,6 +156,16 @@ module RDig
     end
     alias config configuration
     
+    def logger
+      @logger ||= create_logger
+    end
+
+    def create_logger
+      l = Logger.new(RDig.config.log_file)
+      l.level = Logger.const_get RDig.config.log_level.to_s.upcase rescue Logger::WARN
+      return l
+    end
+
   end
 
   class Application
