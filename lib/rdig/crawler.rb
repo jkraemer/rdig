@@ -3,24 +3,30 @@ module RDig
   
   class Crawler
     
-    def initialize
+    def initialize(config = RDig.config, logger = RDig.logger)
       @documents = Queue.new
       @etag_filter = ETagFilter.new
-      @logger = RDig.logger
+      @logger = logger
+      @config = config
     end
 
     def run
-      raise 'no start urls given!' if RDig.config.crawler.start_urls.empty?
-      @indexer = Index::Indexer.new(RDig.config.index)
-      
+      @indexer = Index::Indexer.new(@config.index)
+      crawl
+    ensure
+      @indexer.close if @indexer
+    end
+
+    def crawl
+      raise 'no start urls given!' if @config.crawler.start_urls.empty?
       # check whether we are indexing on-disk or via http
-      url_type = RDig.config.crawler.start_urls.first =~ /^file:\/\// ? :file : :http
+      url_type = @config.crawler.start_urls.first =~ /^file:\/\// ? :file : :http
       chain_config = RDig.filter_chain[url_type]
       
       filterchain = UrlFilters::FilterChain.new(chain_config)
-      RDig.config.crawler.start_urls.each { |url| add_url(url, filterchain) }
+      @config.crawler.start_urls.each { |url| add_url(url, filterchain) }
 
-      num_threads = RDig.config.crawler.num_threads
+      num_threads = @config.crawler.num_threads
       group = ThreadsWait.new
       num_threads.times { |i|
         group.join_nowait Thread.new("fetcher #{i}") {
@@ -32,7 +38,7 @@ module RDig
       }
 
       # check for an empty queue every now and then 
-      sleep_interval = RDig.config.crawler.wait_before_leave
+      sleep_interval = @config.crawler.wait_before_leave
       begin 
         sleep sleep_interval
       end until @documents.empty?
@@ -41,8 +47,6 @@ module RDig
 
       puts "waiting for threads to finish..."
       group.all_waits
-    ensure
-      @indexer.close if @indexer
     end
 
     def process_document(doc, filterchain)
@@ -54,10 +58,14 @@ module RDig
       } unless doc.content[:links].nil?
 
       return unless @etag_filter.apply(doc)
-      @indexer << doc if doc.needs_indexing?
+      add_to_index doc
     rescue
       @logger.error "error processing document #{doc.uri.to_s}: #{$!}"
       @logger.debug "Trace: #{$!.backtrace.join("\n")}"
+    end
+
+    def add_to_index(doc)
+      @indexer << doc if doc.needs_indexing?
     end
 
     

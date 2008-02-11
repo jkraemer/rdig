@@ -13,6 +13,8 @@ class SearcherTest < Test::Unit::TestCase
       cfg.crawler.wait_before_leave = 1
       cfg.index.path = index_dir
       cfg.verbose = true
+      cfg.log_level = :debug
+      cfg.log_file = 'tmp/test.log'
     end
     crawler = Crawler.new
     crawler.run
