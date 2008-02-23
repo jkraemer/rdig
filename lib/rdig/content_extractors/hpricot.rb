@@ -40,12 +40,11 @@ module RDig
       # all textual content contained in the root element and all it's
       # children.
       def extract_content(doc)
-        content = ''
-        ce = content_element(doc)
-        content = strip_tags(strip_comments(ce.inner_html)) if ce
-#          (ce/'h1, h2, h3, h4, h5, h6, p, li, dt, dd, td, address, option, ').each do |child| 
-#          extract_text child, content
-        return content.strip
+        if ce = content_element(doc)
+          return strip_tags(strip_comments(ce.inner_html))
+        end
+          # return (ce.inner_text || '').gsub(Regexp.new('\s+', Regexp::MULTILINE, 'u'), ' ').strip
+        return ''
       end
 
       # extracts the href attributes of all a tags, except 
@@ -91,7 +90,8 @@ module RDig
                                Regexp::MULTILINE, 'u'), ''
         string.gsub! Regexp.new('<.+?>',
                                Regexp::MULTILINE, 'u'), ''
-        string.gsub Regexp.new('\s+', Regexp::MULTILINE, 'u'), ' '
+        string.gsub! Regexp.new('\s+', Regexp::MULTILINE, 'u'), ' '
+        string.strip
       end
 
     end

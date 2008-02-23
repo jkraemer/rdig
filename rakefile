@@ -131,7 +131,7 @@ else
     #### Dependencies and requirements.
 
     s.add_dependency('ferret', '>= 0.10.0')
-    s.add_dependency('hpricot', '>= 0.4')
+    s.add_dependency('hpricot', '>= 0.6')
     #s.requirements << ""
 
     #### Which files are to be included in this gem?  Everything!  (Except CVS directories.)
