@@ -104,6 +104,15 @@ RDig.configuration do |cfg|
   # limit the crawling depth. Default: nil (unlimited)
   # Set to 0 to only index the start_urls.
   # cfg.crawler.max_depth = nil
+  
+  # http proxy configuration
+  # proxy url
+  # cfg.crawler.http_proxy = nil
+  #
+  # proxy username
+  # cfg.crawler.http_proxy_user = nil
+  # proxy password
+  # cfg.crawler.http_proxy_pass = nil
 
   # indexer options
 

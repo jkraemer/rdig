@@ -15,7 +15,7 @@ module RDig
       end
       
       def add_to_index(document)
-        puts "add to index: #{document.uri.to_s}" if RDig::config.verbose
+        RDig.logger.debug "add to index: #{document.uri.to_s}"
         @config.rewrite_uri.call(document.uri) if @config.rewrite_uri
         # all stored and tokenized, should be ferret defaults
         doc = { 

@@ -43,7 +43,7 @@ module RDig
       def search(query, options={})
         result = {}
         query = query_parser.parse(query) if query.is_a?(String)
-        puts "Query: #{query}"
+        RDig.logger.info "Query: #{query}"
         results = []
         searcher = ferret_searcher
         result[:hitcount] = searcher.search_each(query, options) do |doc_id, score|

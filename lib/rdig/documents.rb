@@ -25,7 +25,7 @@ module RDig
       begin
         @uri = URI.parse(args[:uri])
       rescue URI::InvalidURIError
-        raise "Cannot create document using invalid URL: #{args[:url]}"
+        raise "Cannot create document using invalid URL: #{args[:uri]}"
       end
     end
 
@@ -57,13 +57,14 @@ module RDig
     end
 
     def create_child(uri)
-      FileDocument.new(:url => uri)
+      FileDocument.new(:uri => uri)
     end
 
     def self.find_files(path)
       links = []
       pattern = /.+\.(#{File::FILE_EXTENSION_MIME_TYPES.keys.join('|')})$/i
       Dir.glob(File.expand_path(File.join(path, '*'))) do |filename|
+        RDig.logger.debug "checking file #{filename}"
         # Skip files not matching known mime types
         links << "file://#{filename}" if File.directory?(filename) || filename =~ pattern
       end
@@ -116,7 +117,7 @@ module RDig
 
     def fetch
       RDig.logger.debug "fetching #{@uri.to_s}"
-      open(@uri.to_s) do |doc|
+      open(@uri.to_s, RDig::open_uri_http_options) do |doc|
         case doc.status.first.to_i
         when 200
           @etag = doc.meta['etag']

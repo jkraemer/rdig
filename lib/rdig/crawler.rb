@@ -45,7 +45,7 @@ module RDig
       # nothing to do any more, tell the threads to exit
       num_threads.times { @documents << :exit }
 
-      puts "waiting for threads to finish..."
+      @logger.info "waiting for threads to finish..."
       group.all_waits
     end
 

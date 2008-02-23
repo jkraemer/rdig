@@ -22,7 +22,7 @@ module RDig
       def self.extractors; @@extractors ||= [] end
       def self.extractor_instances
         @@extractor_instances ||= extractors.map { |ex_class| 
-          puts "initializing content extractor: #{ex_class}" if RDig.configuration.verbose
+          RDig.logger.info "initializing content extractor: #{ex_class}"
           ex_class.new(RDig.configuration.content_extraction) rescue nil
         }.compact
       end

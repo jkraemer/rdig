@@ -40,6 +40,7 @@ require 'getoptlong'
 require 'tempfile'
 require 'open-uri'
 require 'logger'
+require 'base64'
 
 begin
   require 'ferret'
@@ -116,7 +117,10 @@ module RDig
             :num_threads       => 2,
             :max_redirects     => 5,
             :max_depth         => nil,
-            :wait_before_leave => 10
+            :wait_before_leave => 10,
+            :http_proxy        => nil,
+            :http_proxy_user   => nil,
+            :http_proxy_pass   => nil
           ),
           :content_extraction  => OpenStruct.new(
             # settings for html content extraction (hpricot)
@@ -164,6 +168,18 @@ module RDig
       l = Logger.new(RDig.config.log_file)
       l.level = Logger.const_get RDig.config.log_level.to_s.upcase rescue Logger::WARN
       return l
+    end
+
+    # returns http options for open_uri if configured (i.e., proxy settings)
+    def open_uri_http_options
+      if RDig::configuration.crawler.http_proxy
+        opts = { :proxy => RDig::configuration.crawler.http_proxy }
+        if user = RDig::configuration.crawler.http_proxy_user
+          pass = RDig::configuration.crawler.http_proxy_pass
+          opts['Authorization'] = "Basic " + Base64.encode64("#{user}:#{pass}")
+        end
+        return opts
+      end
     end
 
   end
