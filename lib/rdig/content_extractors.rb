@@ -77,8 +77,8 @@ end
 # load content extractors
 Dir["#{File.expand_path(File.dirname(__FILE__))}/content_extractors/**/*.rb"].each do |f|
   begin
-    require f 
+    require f
   rescue LoadError
-    puts "could not load #{f}: #{$!}"
+    RDig::logger.error "could not load #{f}: #{$!}"
   end
 end

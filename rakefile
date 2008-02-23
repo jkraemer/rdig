@@ -131,9 +131,6 @@ else
     #### Dependencies and requirements.
 
     s.add_dependency('ferret', '>= 0.10.0')
-    # TODO: check if there is anything like 'suggested' instead of required, or
-    # ORed dependencies...
-    #s.add_dependency('rubyful_soup', '>= 1.0.4')
     s.add_dependency('hpricot', '>= 0.4')
     #s.requirements << ""
 

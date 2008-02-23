@@ -35,10 +35,11 @@ RDig.configuration do |cfg|
   # content extraction options
   cfg.content_extraction = OpenStruct.new(
   
-  # HPRICOT configuration
-  # this is the html parser used by default from RDig 0.3.3 upwards.
-  # Hpricot by far outperforms Rubyful Soup, and is at least as flexible when
-  # it comes to selection of portions of the html documents.
+    # HPRICOT configuration
+    # hpricot is the html parsing lib used by RDig. See 
+    # http://code.whytheluckystiff.net/hpricot for usage information.
+    # Any code blocks given for content selection will receive an Hpricot instance
+    # containing the full page content when called.
     :hpricot      => OpenStruct.new(
       # css selector for the element containing the page title
       :title_tag_selector => 'title', 
@@ -48,26 +49,6 @@ RDig.configuration do |cfg|
       # might also be a proc returning either an element or a string:
       # :content_tag_selector => lambda { |hpricot_doc| ... }
     )
-  
-  # RUBYFUL SOUP
-  # This is a powerful, but somewhat slow, ruby-only html parsing lib which was
-  # RDig's default html parser up to version 0.3.2. To use it, comment the
-  # hpricot config above, and uncomment the following:
-  #
-  #  :rubyful_soup => OpenStruct.new(
-  #    # provide a method that returns the title of an html document
-  #    # this method may either return a tag to extract the title from, 
-  #    # or a ready-to-index string.
-  #    :content_tag_selector => lambda { |tagsoup|
-  #      tagsoup.html.body
-  #    },
-  #    # provide a method that selects the tag containing the page content you 
-  #    # want to index. Useful to avoid indexing common elements like navigation
-  #    # and page footers for every page.
-  #    :title_tag_selector         => lambda { |tagsoup|
-  #      tagsoup.html.head.title
-  #    }
-  #  )
   )
 
   # crawler options
