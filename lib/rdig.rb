@@ -163,6 +163,9 @@ module RDig
     def logger
       @logger ||= create_logger
     end
+    def logger=(log)
+      @logger = log
+    end
 
     def create_logger
       l = Logger.new(RDig.config.log_file)
