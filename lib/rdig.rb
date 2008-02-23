@@ -170,16 +170,20 @@ module RDig
       return l
     end
 
-    # returns http options for open_uri if configured (i.e., proxy settings)
+    # returns http options for open_uri if configured
     def open_uri_http_options
-      if RDig::configuration.crawler.http_proxy
-        opts = { :proxy => RDig::configuration.crawler.http_proxy }
-        if user = RDig::configuration.crawler.http_proxy_user
-          pass = RDig::configuration.crawler.http_proxy_pass
-          opts['Authorization'] = "Basic " + Base64.encode64("#{user}:#{pass}")
+      unless RDig::configuration.crawler.open_uri_http_options
+        opts = {}
+        if RDig::configuration.crawler.http_proxy
+          opts[:proxy] = RDig::configuration.crawler.http_proxy
+          if user = RDig::configuration.crawler.http_proxy_user
+            pass = RDig::configuration.crawler.http_proxy_pass
+            opts['Authorization'] = "Basic " + Base64.encode64("#{user}:#{pass}")
+          end
         end
-        return opts
+        RDig::configuration.crawler.open_uri_http_options = opts
       end
+      return RDig::configuration.crawler.open_uri_http_options
     end
 
   end
