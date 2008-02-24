@@ -186,9 +186,11 @@ module RDig
       p document.uri
     end
 
+    # filter uris by hostname list. With a nil or empty list all documents may
+    # pass this filter.
     def UrlFilters.hostname_filter(document, include_hosts)
-      RDig.logger.debug "hostname_filter: #{include_hosts}"
-      return document if include_hosts.empty? || include_hosts.include?(document.uri.host)
+      #RDig.logger.debug "hostname_filter: #{include_hosts}"
+      return document if include_hosts.nil? || include_hosts.empty? || include_hosts.include?(document.uri.host)
     end
 
     def UrlFilters.normalize_uri(document)
