@@ -307,7 +307,8 @@ task :update_version => [:prerelease] do
     if ENV['RELTEST']
       announce "Release Task Testing, skipping commiting of new version"
     else
-      sh %{svn commit -m "Updated to version #{PKG_VERSION}" lib/rdig.rb}
+      sh %{git commit -a -m "Updated to version #{PKG_VERSION}" lib/rdig.rb}
+      sh %{git svn dcommit}
     end
   end
 end
