@@ -24,7 +24,7 @@
 #++
 #
 
-RDIGVERSION = '0.3.5'
+RDIGVERSION = '0.3.4'
 
 
 require 'thread'
@@ -236,7 +236,6 @@ module RDig
       when '--query'
         options.query = value
       when '--version'
-        puts "rdig, version #{RDIGVERSION}"
         exit
       else
         fail "Unknown option: #{opt}"

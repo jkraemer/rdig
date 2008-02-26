@@ -21,7 +21,7 @@ end
 PKG_NAME      = 'rdig'
 
 # Determine the current version of the software
-if `ruby -Ilib ./bin/rdig --version` =~ /rdig, version ([0-9.]+)$/
+if `ruby -Ilib ./bin/rdig --version` =~ /RDig version ([0-9.]+)$/
   CURRENT_VERSION = $1
 else
   CURRENT_VERSION = "0.0.0"
@@ -279,9 +279,9 @@ task :prerelease do
     announce "Release Task Testing, skipping checked-in file test"
   else
     announce "Checking for unchecked-in files..."
-    data = `svn st`
-    unless data =~ /^$/
-      fail "SVN status is not clean ... do you have unchecked-in files?"
+    data = `git status`
+    unless data =~ /working directory clean/
+      fail "GIT status is not clean ... do you have unchecked-in files?"
     end
     announce "No outstanding checkins found ... OK"
   end
