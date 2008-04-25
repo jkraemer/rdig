@@ -24,7 +24,7 @@
 #++
 #
 
-RDIGVERSION = '0.3.5'
+RDIGVERSION = '0.3.6'
 
 
 require 'thread'
@@ -49,12 +49,6 @@ rescue LoadError
   require 'ferret'
 end
 
-begin
-  require 'htmlentities'
-rescue LoadError
-  require 'rubygems'
-  require 'htmlentities'
-end
 
 #require 'htmlentities/htmlentities'
 
