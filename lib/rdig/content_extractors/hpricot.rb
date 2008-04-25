@@ -1,8 +1,10 @@
 begin
   require 'hpricot'
+  require 'htmlentities'
 rescue LoadError
   require 'rubygems'
   require 'hpricot'
+  require 'htmlentities'
 end
   
 if defined?(Hpricot)
@@ -23,11 +25,12 @@ module RDig
       #   :title => 'Title',
       #   :links => [array of urls] }
       def process(content)
+        entities = HTMLEntities.new
         doc = Hpricot(content)
         { 
-          :title => extract_title(doc).decode_entities.strip,
+          :title => entities.decode(extract_title(doc)).strip,
           :links => extract_links(doc),
-          :content => extract_content(doc).decode_entities
+          :content => entities.decode(extract_content(doc))
         }
       end
 

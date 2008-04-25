@@ -49,7 +49,14 @@ rescue LoadError
   require 'ferret'
 end
 
-require 'htmlentities/htmlentities'
+begin
+  require 'htmlentities'
+rescue LoadError
+  require 'rubygems'
+  require 'htmlentities'
+end
+
+#require 'htmlentities/htmlentities'
 
 
 $KCODE = 'u'

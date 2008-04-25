@@ -2,7 +2,7 @@
 - Add max_depth option to crawler configuration for limiting the crawl to a
   specific depth
 - add support for http proxies including basic authentication
-- remove rubyfoul_soup support
+- remove rubyful_soup support
 
 0.3.4
 
