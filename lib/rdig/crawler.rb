@@ -5,7 +5,6 @@ module RDig
     
     def initialize(config = RDig.config, logger = RDig.logger)
       @documents = Queue.new
-      @etag_filter = ETagFilter.new
       @logger = logger
       @config = config
     end
@@ -22,7 +21,8 @@ module RDig
       # check whether we are indexing on-disk or via http
       url_type = @config.crawler.start_urls.first =~ /^file:\/\// ? :file : :http
       chain_config = RDig.filter_chain[url_type]
-      
+
+      @etag_filter = ETagFilter.new
       filterchain = UrlFilters::FilterChain.new(chain_config)
       @config.crawler.start_urls.each { |url| add_url(url, filterchain) }
 
@@ -110,7 +110,7 @@ module RDig
     end
 
     def apply(document)
-      return document unless (document.respond_to?(:etag) && document.etag)
+      return document unless (document.respond_to?(:etag) && !document.etag.blank?)
       synchronize do
         @etags.add?(document.etag) ? document : nil 
       end

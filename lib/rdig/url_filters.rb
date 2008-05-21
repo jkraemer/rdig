@@ -65,7 +65,7 @@ module RDig
     # implemented as a thread safe singleton as it has to be shared
     # between all crawler threads
     class VisitedUrlFilter
-      include MonitorMixin, Singleton
+      include MonitorMixin
       def initialize
         @visited_urls = Set.new
         super

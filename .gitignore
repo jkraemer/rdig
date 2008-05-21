@@ -1,3 +1,4 @@
+*.tmproj
 *.swp
 tmp
 pkg
