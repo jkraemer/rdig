@@ -28,8 +28,8 @@ class SearcherTest < Test::Unit::TestCase
 
   def test_search
     result = RDig.searcher.search 'some sample text'
-    assert_equal 3, result[:hitcount]
-    assert_equal 3, result[:list].size
+    assert_equal 5, result[:hitcount]
+    assert_equal 5, result[:list].size
   end
 
 end

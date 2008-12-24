@@ -52,6 +52,18 @@ class HpricotContentExtractorTest < Test::Unit::TestCase
     assert_equal '/inside.html', result[:links][1]
     assert_equal '/footer.html', result[:links][2]
   end
+  
+  def test_extracts_links_from_frameset
+    result = @extractor.process(html_doc('frameset'))
+    assert_equal 'http://test.host/first.html', result[:links].first
+    assert_equal '/second.html', result[:links].last
+  end
+  
+  def test_extracts_links_from_imagemap
+    result = @extractor.process(html_doc('imagemap'))
+    assert_equal 'http://test.host/first.html', result[:links].first
+    assert_equal '/second.html', result[:links].last
+  end
 
   
   def test_title_from_dcmeta

@@ -53,12 +53,14 @@ module RDig
       # extracts the href attributes of all a tags, except 
       # internal links like <a href="#top">
       def extract_links(doc)
-        (doc/'a').map { |link|
-          href = link['href']
-          CGI.unescapeHTML(href) if href && href !~ /^#/
-        }.compact
+        {'a' => 'href', 'area' => 'href', 'frame' => 'src'}.map do |tag, attr|
+          (doc/tag).map do |tag|
+            value = tag[attr]
+            CGI.unescapeHTML(value) if value && value !~ /^#/
+          end
+        end.flatten.compact
       end
-
+      
       # Extracts the title from the given html tree
       def extract_title(doc)
         the_title_tag = title_tag(doc)
