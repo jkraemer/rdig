@@ -1,3 +1,10 @@
+0.3.7
+- also extract links from area and frame tags
+- fix etagfilter bug
+
+0.3.6
+- remove bundled htmlentities in favor of a gem dependency
+
 0.3.5
 - Add max_depth option to crawler configuration for limiting the crawl to a
   specific depth
