@@ -110,7 +110,7 @@ module RDig
     end
 
     def apply(document)
-      return document unless (document.respond_to?(:etag) && !document.etag.blank?)
+      return document unless (document.respond_to?(:etag) && document.etag && !document.etag.empty?)
       synchronize do
         @etags.add?(document.etag) ? document : nil 
       end
