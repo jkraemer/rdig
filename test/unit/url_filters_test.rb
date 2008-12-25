@@ -74,7 +74,7 @@ class UrlFiltersTest < Test::Unit::TestCase
     doc = Document.create('http://test.host/dir/file.html')
     assert_equal('http://test.host/dir/another.html',
                   UrlFilters.fix_relative_uri(doc.create_child('another.html')).uri.to_s)
-    assert_equal('http://test.host/dir/../another.html',
+    assert_equal('http://test.host/another.html',
                   UrlFilters.fix_relative_uri(doc.create_child('../another.html')).uri.to_s)
     assert_equal('http://test.host/dir/another.html',
                   UrlFilters.fix_relative_uri(doc.create_child('/dir/another.html')).uri.to_s)

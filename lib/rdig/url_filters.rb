@@ -65,7 +65,7 @@ module RDig
     # implemented as a thread safe singleton as it has to be shared
     # between all crawler threads
     class VisitedUrlFilter
-      include MonitorMixin
+      include MonitorMixin, Singleton
       def initialize
         @visited_urls = Set.new
         super
@@ -163,7 +163,7 @@ module RDig
       return document
     end
 
-    # expands both href="/path/xyz.html" and href="affe.html"
+    # expands href="/path/xyz.html", href="affe.html" and href="../lala.html"
     # to full urls
     def UrlFilters.fix_relative_uri(document)
       #return nil unless document.uri.scheme.nil? || document.uri.scheme =~ /^https?/i
@@ -175,11 +175,13 @@ module RDig
       uri.port = ref.port unless uri.port || ref.port==ref.default_port
       uri.path = ref.path unless uri.path
       
-      if uri.path !~ /^\//
+      old_uri_path = uri.path
+      if uri.path !~ /^\// || uri.path =~ /^\.\./
         ref_path = ref.path || '/'
         ref_path << '/' if ref_path.empty?
         uri.path = ref_path[0..ref_path.rindex('/')] + uri.path
-      end 
+      end
+      uri.path = uri.path.sub( /\/[^\/]*\/\.\./, "" ) if old_uri_path =~ /^\.\./
       return document
     rescue
       p document
