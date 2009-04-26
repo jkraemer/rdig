@@ -1,3 +1,11 @@
+== 0.3.8 2009-04-26
+
+* bump up version
+
 == 0.3.7 2009-04-26
 
 * Gem spec for automatic gem building on github
+* doc enhancements
+* better uri-normalization, re-add result uri of redirection
+  into the queue instea of directly indexing the resulting
+  page
