@@ -52,13 +52,21 @@ module RDig
     def process_document(doc, filterchain)
       @logger.debug "processing document #{doc}"
       doc.fetch
-      # add links from this document to the queue
-      doc.content[:links].each { |url| 
-        add_url(url, filterchain, doc) 
-      } unless doc.content[:links].nil?
-
-      return unless @etag_filter.apply(doc)
-      add_to_index doc
+      case doc.status
+      when :success
+        if @etag_filter.apply(doc)
+          # add links from this document to the queue
+          doc.content[:links].each { |url| 
+            add_url(url, filterchain, doc) 
+          } unless doc.content[:links].nil?
+          add_to_index doc
+        end        
+      when :redirect
+        @logger.debug "redirect to #{doc.content}"
+        add_url(doc.content, filterchain, doc)
+      else
+        @logger.error "unknown doc status #{doc.status}: #{doc}"
+      end
     rescue
       @logger.error "error processing document #{doc.uri.to_s}: #{$!}"
       @logger.debug "Trace: #{$!.backtrace.join("\n")}"

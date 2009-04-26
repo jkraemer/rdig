@@ -22,7 +22,7 @@ module RDig
       end
 
       # add a filter and it's args to the chain
-      # when args is a symbol, it is treated as a configuration key
+      # if args is a symbol, it is treated as a configuration key
       def add(filter, args=nil)
         args = RDig.config.crawler.send(args) if args.is_a? Symbol
         case filter
@@ -195,12 +195,17 @@ module RDig
       return document if include_hosts.nil? || include_hosts.empty? || include_hosts.include?(document.uri.host)
     end
 
-    def UrlFilters.normalize_uri(document)
+    def UrlFilters.normalize_uri(document, cfg)
       document.uri.fragment = nil
       # document.uri.query = nil
-      # append index document if configured and path ends with a slash
-      if RDig.config.index_document && document.uri.path =~ /\/$/
-        document.uri.path << RDig.config.index_document
+      # trailing slash handling
+      if document.uri.path =~ /\/$/
+        # append index document if configured
+        if cfg.index_document
+          document.uri.path << RDig.config.index_document
+        elsif cfg.remove_trailing_slash
+         document.uri.path.gsub! /\/$/, ''
+        end
       end
       return document
     end

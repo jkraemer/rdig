@@ -23,7 +23,13 @@ module RDig
       def self.extractor_instances
         @@extractor_instances ||= extractors.map { |ex_class| 
           RDig.logger.info "initializing content extractor: #{ex_class}"
-          ex_class.new(RDig.configuration.content_extraction) rescue nil
+          ex = nil
+          begin
+            ex = ex_class.new(RDig.configuration.content_extraction)
+          rescue Exception
+            RDig.logger.error "error: #{$!.message}\n#{$!.backtrace.join("\n")}"
+          end
+          ex
         }.compact
       end
       

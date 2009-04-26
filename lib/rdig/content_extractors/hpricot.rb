@@ -7,7 +7,6 @@ rescue LoadError
   require 'htmlentities'
 end
   
-if defined?(Hpricot)
 module RDig
   module ContentExtractors
 
@@ -90,6 +89,7 @@ module RDig
       def strip_comments(string)
         string.gsub Regexp.new('<!--.*?-->', Regexp::MULTILINE, 'u'), ''
       end
+      
       def strip_tags(string)
         string.gsub! Regexp.new('<(script|style).*?>.*?<\/(script|style).*?>', 
                                Regexp::MULTILINE, 'u'), ''
@@ -102,5 +102,4 @@ module RDig
     end
 
   end
-end
 end

@@ -118,16 +118,20 @@ module RDig
     def fetch
       RDig.logger.debug "fetching #{@uri.to_s}"
       open(@uri.to_s, RDig::open_uri_http_options) do |doc|
-        case doc.status.first.to_i
-        when 200
-          @etag = doc.meta['etag']
-          # puts "etag: #{@etag}"
-          @content = ContentExtractors.process(doc.read, doc.content_type)
-          @status = :success
-        when 404
-          RDig.logger.info "got 404 for #{@uri}"
+        if @uri.to_s != doc.base_uri.to_s
+          @status = :redirect
+          @content = doc.base_uri
         else
-          RDig.logger.info "don't know what to do with response: #{doc.status.join(' : ')}"
+          case doc.status.first.to_i
+          when 200
+            @etag = doc.meta['etag']
+            @content = ContentExtractors.process(doc.read, doc.content_type)
+            @status = :success
+          when 404
+            RDig.logger.info "got 404 for #{@uri}"
+          else
+            RDig.logger.info "don't know what to do with response: #{doc.status.join(' : ')}"
+          end
         end
       end
     rescue

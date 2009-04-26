@@ -86,6 +86,13 @@ RDig.configuration do |cfg|
   # Set to 0 to only index the start_urls.
   # cfg.crawler.max_depth = nil
   
+  # default index document to be appended to URIs ending with a trailing '/'
+  # cfg.crawler.normalize_uri.index_document = nil
+  # strip trailing '/' from URIs to avoid double indexing of pages referred by '
+  # Ignored if index_document is set.
+  # Not necessary when the server issues proper etags since the default etag filter will kill these doublettes.
+  # cfg.crawler.normalize_uri.remove_trailing_slash = nil
+  
   # http proxy configuration
   # proxy url
   # cfg.crawler.http_proxy = nil

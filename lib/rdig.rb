@@ -61,17 +61,16 @@ module RDig
 
   class << self
 
-    # the filter chains are for limiting the set of indexed documents.
-    # there are two chain types - one for http, and one for file system
-    # crawling.
-    # a document has to survive all filters in the chain to get indexed.
+    # Filter chains are used by the crawler to limit the set of documents being indexed.
+    # There are two chains - one for http, and one for file system crawling.
+    # Each document has to survive all filters in the relevant chain to get indexed.
     def filter_chain
       @filter_chain ||= {
         # filter chain for http crawling
         :http => [
           :scheme_filter_http,
           :fix_relative_uri,
-          :normalize_uri,
+          { :normalize_uri => :normalize_uri },
           { RDig::UrlFilters::DepthFilter => :max_depth },
           { :hostname_filter => :include_hosts },
           { RDig::UrlFilters::UrlInclusionFilter => :include_documents },
@@ -121,7 +120,11 @@ module RDig
             :wait_before_leave => 10,
             :http_proxy        => nil,
             :http_proxy_user   => nil,
-            :http_proxy_pass   => nil
+            :http_proxy_pass   => nil,
+            :normalize_uri => OpenStruct.new(
+              :index_document => nil,
+              :remove_trailing_slash => nil
+            )
           ),
           :content_extraction  => OpenStruct.new(
             # settings for html content extraction (hpricot)
