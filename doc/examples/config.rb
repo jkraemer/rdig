@@ -101,6 +101,9 @@ RDig.configuration do |cfg|
   # cfg.crawler.http_proxy_user = nil
   # proxy password
   # cfg.crawler.http_proxy_pass = nil
+  #
+  # to use basic auth without a proxy, use this syntax:
+  # cfg.crawler.open_uri_http_options = { :http_basic_authentication => [user, password] }
 
   # indexer options
 
