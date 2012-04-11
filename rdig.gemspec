@@ -17,7 +17,7 @@ Gem::Specification.new do |s|
     LICENSE
     Manifest.txt
     rakefile
-    README
+    README.rdig
     bin/rdig
     doc/examples/config.rb
     lib/rdig/content_extractors/doc.rb
