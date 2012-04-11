@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 #--
-# Copyright (c) 2006 Jens Kraemer
+# Copyright (c) 2006-2012 Jens Kraemer, jk@jkraemer.net
 # 
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
