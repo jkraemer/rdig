@@ -25,7 +25,7 @@ manually do a +gem install rubyful_soup+.
 === Handle search in your application:
   require 'rdig'
   require 'rdig_config'   # load your config file here
-  search_results = RDig.searcher.search(query, options={})
+  search_results = RDig.searcher.search(query)
 
 see RDig::Search::Searcher for more information.
 

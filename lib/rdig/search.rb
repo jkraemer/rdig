@@ -5,17 +5,17 @@ module RDig
     # Call RDig::searcher to retrieve an instance ready for use.
     class Searcher
       include Ferret::Search
-      
+
       # the query parser used to parse query strings
       attr_reader :query_parser
-  
+
       # takes the ferret section of the rdig configuration as a parameter.
       def initialize(settings)
         @ferret_config = settings
         @query_parser = Ferret::QueryParser.new(settings.marshal_dump)
         ferret_searcher
       end
-  
+
       # returns the Ferret::Search::IndexSearcher instance used internally.    
       def ferret_searcher
         if @ferret_searcher and !@ferret_searcher.reader.latest?
@@ -29,7 +29,14 @@ module RDig
         end
         @ferret_searcher
       end
-  
+
+      def get_maximum_score(query, options)
+        ferret_searcher.search_each(query, options.merge(:limit => 1, :offset => 0)) do |doc_id, score|
+          return score
+        end
+        0
+      end
+
       # run a search. 
       # +query+ usually will be a user-entered string. See the Ferret query 
       # language[http://ferret.davebalmain.com/api/classes/Ferret/QueryParser.html]
@@ -46,23 +53,26 @@ module RDig
         RDig.logger.info "Query: #{query}"
         results = []
         searcher = ferret_searcher
+        maximum_score = get_maximum_score query, options
         result[:hitcount] = searcher.search_each(query, options) do |doc_id, score|
           doc = searcher[doc_id]
           results << { :score => score, 
                        :title => doc[:title], 
                        :url => doc[:url], 
-                       :extract => build_extract(doc[:data]) }
+                       :extract => build_extract(doc[:data]),
+                       :relative_score => (score / maximum_score)
+                     }
         end
         result[:list] = results
         result
       end
-  
+
       def build_extract(data)
         (data && data.length > 200) ? data[0..200] : data      
       end
-  
+
     end
-  
+
   #  class SearchResult < OpenStruct
   #    def initialize(doc, score)
   #      self.score = score
@@ -72,6 +82,6 @@ module RDig
   #    end
   #  end
 
-     
+
   end
 end
