@@ -9,7 +9,7 @@ module RDig
       # the query parser used to parse query strings
       attr_reader :query_parser
 
-      # takes the ferret section of the rdig configuration as a parameter.
+      # takes the index section of the rdig configuration as a parameter.
       def initialize(settings)
         @ferret_config = settings
         @query_parser = Ferret::QueryParser.new(settings.marshal_dump)
@@ -37,38 +37,64 @@ module RDig
         0
       end
 
-      # run a search. 
+      # run a search.
+      #
       # +query+ usually will be a user-entered string. See the Ferret query 
       # language[http://ferret.davebalmain.com/api/classes/Ferret/QueryParser.html]
       # for more information on queries.
       # A Ferret::Search::Query instance may be given, too.
-      # 
+      #
       # Some of the more often used otions are:
       # offset:: first document in result list to retrieve (0-based). The default is 0.
       # limit:: number of documents to retrieve. The default is 10.
+      # highlight:: hash to configure excerpt highlighting, e.g.
+      #    :highlight => { :pre_tag => '<b>',
+      #                    :post_tag => '</b>',
+      #                    :ellipsis => '&hellip;',
+      #                    :excerpt_length => 50,
+      #                    :num_excerpts => 3 }
+      # You may just set :highlight => true to go with the defaults, or use a hash to
+      # override those default values.
+      #
       # Please see the Ferret::Search::Searcher API for more options.
       def search(query, options={})
         result = {}
-        query = query_parser.parse(query) if query.is_a?(String)
+        query = process_query query
         RDig.logger.info "Query: #{query}"
         results = []
         searcher = ferret_searcher
         maximum_score = get_maximum_score query, options
         result[:hitcount] = searcher.search_each(query, options) do |doc_id, score|
           doc = searcher[doc_id]
-          results << { :score => score, 
-                       :title => doc[:title], 
-                       :url => doc[:url], 
+          results << { :score => score,
+                       :title => doc[:title],
+                       :url => doc[:url],
                        :extract => build_extract(doc[:data]),
-                       :relative_score => (score / maximum_score)
+                       :relative_score => (score / maximum_score),
+                       :doc_id => doc_id
                      }
+        end
+        if highlight_opts = options[:highlight]
+          highlight_opts = { :pre_tag => '<b>',
+                             :post_tag => '</b>',
+                             :ellipsis => '&hellip;',
+                             :excerpt_length => 50,
+                             :num_excerpts => 3 }.merge(Hash === highlight_opts ? highlight_opts : {})
+          results.each do |r|
+            r[:extract] = searcher.highlight(query, r[:doc_id], :data, highlight_opts)
+          end
         end
         result[:list] = results
         result
       end
 
+      def process_query(query)
+        query = query_parser.parse(query) if query.is_a?(String)
+        return query
+      end
+
       def build_extract(data)
-        (data && data.length > 200) ? data[0..200] : data      
+        (data && data.length > 200) ? data[0..200] : data
       end
 
     end

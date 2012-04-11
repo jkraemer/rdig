@@ -2,7 +2,7 @@
 
 #--
 # Copyright (c) 2006-2012 Jens Kraemer, jk@jkraemer.net
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
 # "Software"), to deal in the Software without restriction, including
@@ -10,10 +10,10 @@
 # distribute, sublicense, and/or sell copies of the Software, and to
 # permit persons to whom the Software is furnished to do so, subject to
 # the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be
 # included in all copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 # MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -24,7 +24,7 @@
 #++
 #
 
-RDIGVERSION = '0.3.8'
+RDIGVERSION = '0.3.10'
 
 
 require 'thread'
@@ -143,7 +143,7 @@ module RDig
             :create              => true,
             :handle_parse_errors => true,
             :analyzer            => Ferret::Analysis::StandardAnalyzer.new,
-            :occur_default       => :must,
+            :or_default          => false,
             :default_field       => '*'
           )
         )

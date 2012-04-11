@@ -8,7 +8,7 @@ RDig.configuration do |cfg|
 
   # log level, set to :debug, :info, :warn or :error
   cfg.log_level = :info
-  
+
   # provide one or more URLs for the crawler to start from
   cfg.crawler.start_urls = [ 'http://www.example.com/' ]
 
@@ -26,15 +26,19 @@ RDig.configuration do |cfg|
   # caution, existing contents of this directory will be deleted!
   cfg.index.path        = '/path/to/index'
 
+  # Set the analyzer to use.
+  # See the Ferret::Analysis package rdoc for more info about analyzers.
+  # cfg.index.analyzer = Ferret::Analysis::StandardAnalyzer.new
+
   ##################################################################
   # options you might want to set, the given values are the defaults
 
   # set to true to get stack traces on errors
   # cfg.verbose = false
-  
+
   # content extraction options
   cfg.content_extraction = OpenStruct.new(
-  
+
     # HPRICOT configuration
     # hpricot is the html parsing lib used by RDig. See 
     # http://code.whytheluckystiff.net/hpricot for usage information.
@@ -52,11 +56,11 @@ RDig.configuration do |cfg|
   )
 
   # crawler options
-  
+
   # Notice: for file system crawling the include/exclude_document patterns are 
   # applied to the full path of _files_ only (like /home/bob/test.pdf), 
   # for http to full URIs (like http://example.com/index.html).
-  
+
   # nil (include all documents) or an array of Regexps 
   # matching the URLs you want to index.
   # cfg.crawler.include_documents = nil
@@ -67,7 +71,7 @@ RDig.configuration do |cfg|
   # to exclude documents here that aren't wanted but would be 
   # included by the inclusion patterns.
   # cfg.crawler.exclude_documents = nil
- 
+
   # number of document fetching threads to use. Should be raised only if 
   # your CPU has idle time when indexing.
   # cfg.crawler.num_threads = 2
@@ -85,14 +89,14 @@ RDig.configuration do |cfg|
   # limit the crawling depth. Default: nil (unlimited)
   # Set to 0 to only index the start_urls.
   # cfg.crawler.max_depth = nil
-  
+
   # default index document to be appended to URIs ending with a trailing '/'
   # cfg.crawler.normalize_uri.index_document = nil
   # strip trailing '/' from URIs to avoid double indexing of pages referred by '
   # Ignored if index_document is set.
   # Not necessary when the server issues proper etags since the default etag filter will kill these doublettes.
   # cfg.crawler.normalize_uri.remove_trailing_slash = nil
-  
+
   # http proxy configuration
   # proxy url
   # cfg.crawler.http_proxy = nil
@@ -106,6 +110,18 @@ RDig.configuration do |cfg|
   # cfg.crawler.open_uri_http_options = { :http_basic_authentication => [user, password] }
 
   # indexer options
+
+  # RDig defaults to AND queries:
+  # "foo bar" -> foo AND bar
+  # "foo OR bar" -> foo OR bar
+  # "foo AND bar" -> foo AND bar
+  # cfg.index.or_default = false
+
+  # set to true to get the default ferret behaviour:
+  # "foo bar" -> foo OR bar
+  # "foo OR bar" -> foo OR bar
+  # "foo AND bar" -> foo AND bar
+  # cfg.index.or_default = true
 
   # create a new index on each run. Will append to the index if false. Use when
   # building a single index from multiple runs, e.g. one across a website and the
@@ -121,5 +137,5 @@ RDig.configuration do |cfg|
   #   uri.scheme = 'http'
   #   uri.host = 'www.mydomain.com'
   # }
-  
+
 end
