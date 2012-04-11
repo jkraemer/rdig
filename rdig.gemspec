@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.date = %q{2009-04-26}
   s.description = %q{Website crawler and fulltext indexer.}
   s.email = %q{jk@jkraemer.net}
-  s.extra_rdoc_files = ["History.txt", "Manifest.txt", "README"]
+  s.extra_rdoc_files = ["History.txt", "Manifest.txt", "README.rdoc"]
   s.files = %w(
     CHANGES
     History.txt
@@ -17,7 +17,7 @@ Gem::Specification.new do |s|
     LICENSE
     Manifest.txt
     rakefile
-    README.rdig
+    README.rdoc
     bin/rdig
     doc/examples/config.rb
     lib/rdig/content_extractors/doc.rb
