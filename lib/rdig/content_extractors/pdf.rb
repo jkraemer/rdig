@@ -8,7 +8,7 @@ module RDig
     #
     class PdfContentExtractor < ContentExtractor
       include ExternalAppHelper
-      
+
       def initialize(config)
         super(config)
         @pattern = /^application\/pdf/
@@ -22,7 +22,7 @@ module RDig
           end
         }
       end
- 
+
       def process(content)
         result = {}
         as_file(content) do |file|
@@ -35,7 +35,7 @@ module RDig
       def get_content(path_to_tempfile)
         %x{#{@pdftotext} -enc UTF-8 '#{path_to_tempfile}' -}
       end
-      
+
       # extracts the title from pdf meta data
       # needs pdfinfo
       # returns the title or nil if no title was found

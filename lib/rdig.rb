@@ -84,7 +84,7 @@ module RDig
           { RDig::UrlFilters::PathExclusionFilter => :exclude_documents }
         ]
       }
-         
+
     end
 
     def application
@@ -150,7 +150,7 @@ module RDig
       end
     end
     alias config configuration
-    
+
     def logger
       @logger ||= create_logger
     end
@@ -200,12 +200,12 @@ module RDig
     def options
       @options ||= OpenStruct.new
     end
-    
+
     # Display the program usage line.
     def usage
       puts "rdig -c configfile {options}"
     end
-    
+
     # Display the rake command line help.
     def help
       usage
@@ -266,8 +266,7 @@ module RDig
       rescue
         puts $!.backtrace
         fail "No Configfile found!\n#{$!}"
-        
-      end    
+      end
 
       puts "using Ferret #{Ferret::VERSION}"
 

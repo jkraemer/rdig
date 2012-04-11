@@ -1,14 +1,14 @@
 module RDig
-  
+
   #
   # Document base class
   #
   class Document
-    
+
     attr_reader :uri
     attr_reader :content
     attr_reader :content_type
-    
+
     def self.create(url)
       return case url
         when /^https?:\/\//i
@@ -32,7 +32,7 @@ module RDig
     def title; @content[:title] end
     def body; @content[:content] end
     def links; @content[:links] end
-    
+
     def needs_indexing?
       has_content? && (title || body)
     end
@@ -47,7 +47,7 @@ module RDig
 
   end
 
-  
+
   #
   # Document in a File system
   #
@@ -90,8 +90,8 @@ module RDig
     end
 
   end
-  
-  
+
+
   #
   # Remote Document to be retrieved by HTTP
   #
@@ -106,7 +106,7 @@ module RDig
     def create_child(uri)
       HttpDocument.new(:uri => uri, :referrer => self.uri, :depth => self.depth+1) unless uri =~ /^file:\/\//i 
     end
-    
+
     # url: url of this document, may be relative to the referring doc or host.
     # referrer: uri of the document we retrieved this link from
     def initialize(args={})

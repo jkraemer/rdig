@@ -1,5 +1,5 @@
 module RDig
- 
+
   # Contains classes which are used for extracting content and meta data from
   # various content types.
   module ContentExtractors
@@ -13,7 +13,7 @@ module RDig
     # Extractors inheriting from this class will be auto-discovered and used
     # when can_do returns true
     class ContentExtractor
-      
+
       def self.inherited(extractor)
         super(extractor)
         self.extractors << extractor
@@ -32,7 +32,7 @@ module RDig
           ex
         }.compact
       end
-      
+
       def self.process(content, content_type)
         self.extractor_instances.each { |extractor|
           return extractor.process(content) if extractor.can_do(content_type)
@@ -61,7 +61,7 @@ module RDig
         end
         result
       end
-      
+
       def as_file(content)
         file = Tempfile.new('rdig')
         file << content

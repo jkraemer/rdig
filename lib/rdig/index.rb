@@ -1,11 +1,14 @@
 module RDig
   module Index
-  
+
     # used by the crawler to build the ferret index
     class Indexer
       include MonitorMixin
-      
+
+      attr_reader :indexed_documents
+
       def initialize(settings)
+        @indexed_documents = 0
         @config = settings
         @index_writer = Ferret::Index::IndexWriter.new(
                           :path     => settings.path,
@@ -13,7 +16,7 @@ module RDig
                           :analyzer => settings.analyzer)
         super() # scary, MonitorMixin won't initialize if we don't call super() here (parens matter)
       end
-      
+
       def add_to_index(document)
         RDig.logger.debug "add to index: #{document.uri.to_s}"
         @config.rewrite_uri.call(document.uri) if @config.rewrite_uri
@@ -25,16 +28,17 @@ module RDig
         }
         synchronize do
           @index_writer << doc
+          @indexed_documents += 1
         end
       end
       alias :<< :add_to_index
-  
+
       def close
         @index_writer.optimize
         @index_writer.close
         @index_writer = nil
       end
     end
-    
+
   end
 end

@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{rdig}
-  s.version = "0.3.8"
+  s.version = "0.3.9"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Jens Kraemer"]
@@ -59,6 +59,9 @@ Gem::Specification.new do |s|
     test/unit/searcher_test.rb
     test/unit/url_filters_test.rb
     test/unit/word_content_extractor_test.rb
+  )
+  s.executables = %w(
+    rdig
   )
 
   s.add_dependency(%q<ferret>, [">= 0.11.6"])

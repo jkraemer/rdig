@@ -1,9 +1,10 @@
 module RDig
-  
+
   module UrlFilters
 
     class FilterChain
       def initialize(chain_config)
+        @logger = RDig.logger
         @filters = []
         chain_config.each { |filter|
           case filter
@@ -29,11 +30,23 @@ module RDig
         when Symbol
           if args.nil?
             @filters << lambda { |document|
-              UrlFilters.send(filter, document)
+              begin
+                UrlFilters.send(filter, document)
+              rescue Exception
+                @logger.error "error in URL filter #{filter}: #{$!}"
+                @logger.error $!.backtrace.join("\n")
+                nil
+              end
             }
           else
             @filters << lambda { |document|
-              UrlFilters.send(filter, document, args)
+              begin
+                UrlFilters.send(filter, document, args)
+              rescue Exception
+                @logger.error "error in URL filter #{filter}: #{$!}"
+                @logger.error $!.backtrace.join("\n")
+                nil
+              end
             }
           end
         when Class
@@ -54,7 +67,13 @@ module RDig
 
       def apply(document)
         @filters.each { |filter|
-          return nil unless filter.call(document)
+          @logger.debug "running filter #{filter.inspect} on doc #{document.uri}"
+          unless filter.call(document)
+            @logger.debug "fail"
+            return nil
+          else
+            @logger.debug 'OK'
+          end
         }
         return document
       end
@@ -75,7 +94,7 @@ module RDig
       # nil otherwise
       def apply(document)
         synchronize do
-          @visited_urls.add?(document.uri.to_s) ? document : nil 
+          @visited_urls.add?(document.uri.to_s) ? document : nil
         end
       end
     end
@@ -174,7 +193,7 @@ module RDig
       uri.host = ref.host unless uri.host
       uri.port = ref.port unless uri.port || ref.port==ref.default_port
       uri.path = ref.path unless uri.path
-      
+
       old_uri_path = uri.path
       if uri.path !~ /^\// || uri.path =~ /^\.\./
         ref_path = ref.path || '/'
@@ -202,7 +221,7 @@ module RDig
       if document.uri.path =~ /\/$/
         # append index document if configured
         if cfg.index_document
-          document.uri.path << RDig.config.index_document
+          document.uri.path << cfg.index_document
         elsif cfg.remove_trailing_slash
          document.uri.path.gsub! /\/$/, ''
         end
