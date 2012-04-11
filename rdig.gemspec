@@ -34,7 +34,7 @@ Gem::Specification.new do |s|
     lib/rdig.rb
   )
   s.has_rdoc = true
-  s.homepage = %q{ http://github.com/jkraemer/rdig/ }
+  s.homepage = %q{http://github.com/jkraemer/rdig/}
   s.rdoc_options = ["--main", "README"]
   s.require_paths = ["lib"]
   s.rubyforge_project = %q{rdig}
